@@ -1,0 +1,26 @@
+{
+    "manifest_version": 3,
+    "name": "Toranoana Downloader",
+    "description": "downloader for toranoana online hondana",
+    "version": "1.0",
+    "action": {
+        "default_popup": "hello.html",
+        "default_icon": "hello_extensions.png"
+    },
+    "permissions": [
+        "downloads"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "https://viewer.toraebook.com/imageviewer/index.php"
+            ],
+            "css": [
+                "my-styles.css"
+            ],
+            "js": [
+                "content-script.js"
+            ]
+        }
+    ],
+}

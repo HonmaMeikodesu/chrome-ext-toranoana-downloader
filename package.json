@@ -1,0 +1,24 @@
+{
+  "name": "chrome-ext-toranoana-downloader",
+  "version": "1.0.0",
+  "description": "downloader for toranoana online hondana",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HonmaMeikodesu/chrome-ext-toranoana-downloader.git"
+  },
+  "keywords": [
+    "toranoana",
+    "node",
+    "chrome-extension"
+  ],
+  "author": "HonmaMeikodesu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/HonmaMeikodesu/chrome-ext-toranoana-downloader/issues"
+  },
+  "homepage": "https://github.com/HonmaMeikodesu/chrome-ext-toranoana-downloader#readme"
+}
