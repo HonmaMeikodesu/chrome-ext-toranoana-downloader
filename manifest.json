@@ -4,23 +4,22 @@
     "description": "downloader for toranoana online hondana",
     "version": "1.0",
     "action": {
-        "default_popup": "hello.html",
         "default_icon": "hello_extensions.png"
     },
     "permissions": [
-        "downloads"
+        "downloads", "activeTab", "scripting"
     ],
     "content_scripts": [
         {
             "matches": [
-                "https://viewer.toraebook.com/imageviewer/index.php"
-            ],
-            "css": [
-                "my-styles.css"
+                "https://viewer.toraebook.com/imageviewer/index.php/*"
             ],
             "js": [
                 "content-script.js"
             ]
         }
     ],
+    "background": {
+        "service_worker": "background.js"
+    }
 }
