@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+
+<!--=========== METADATA ============-->
+<title>とらのあな電子書籍</title>
+
+<meta name="description" content="" />
+<meta name="keywords" content="" />
+<meta name="viewport" content="width=480" />
+<meta equiv="expires" content="0" />
+<!--=========== /METADATA ============-->
+
+
+<!--=========== IMPORT ============-->
+<script type="text/javascript" src="scripts/jQuery/jquery-3.0.0.min.js"></script>
+<script type="text/javascript" src="scripts/jQuery/jquery.bottom-1.0.js"></script>
+<link rel="stylesheet" type="text/css" href="cp_data/toranoana/css/style.css" />
+<script type="text/javascript" src="scripts/smart_comic/default.js?20140108"></script>
+<script src="scripts/smart_comic/readReq.js" type="text/javascript" charset="UTF-8"></script>
+<!--=========== /IMPORT ============-->
+</head>
+
+<noscript>
+<p>当サイトはJavaScriptを使用しています。JavaScriptをONにしてご覧ください。</p>
+</noscript>
+<body>
+
+
+
+<div class="container">
+<!--=========== .container ============-->
+
+
+
+<header id="header">
+
+<!--===== header =====--><link rel="stylesheet" type="text/css" href="cp_data/toranoana/css/tora_pc_style.css" />
+
+<!--本棚ロゴ-->
+<div id="menu_box">
+    <div id="logo"><a href="index.php?p=purchase"></a></div>
+<div id="menu">
+    <a id="mailorder" href="http://www.toranoana.jp/mailorder/ebk/"><!-- ストア --></a>
+    <a id="wish" href="index.php?p=wish"><!--お気に入り--></a>    <a id="sync" href="index.php?p=purchase&act=update"><!--同期--></a>
+    <a id="logout" href="index.php?p=login&act=logout"><!--ログアウト--></a>
+</div>
+</div>
+<form name="searchForm" action="" method="GET">
+<input type="hidden" name="p" value="purchase">
+<input type="hidden" name="sort_Kbn" value="0">
+<input type="hidden" name="serch_word" value="">
+<input type="hidden" name="serch_kbn" value="0">
+<input type="hidden" name="is_desc" value="1">
+<div class="search">
+<p>
+
+<select name="serch_kbn">
+	<option label="タイトル名" value="0" selected="selected">タイトル名</option>
+<option label="サークル名" value="1">サークル名</option>
+<option label="作家名" value="2">作家名</option>
+<option label="全て" value="3">全て</option>
+
+</select>
+
+<input type="text" name="serch_word" value="" placeholder="検索キーワード"/>
+<a href="" onclick="javascript:titleSearch(); return false;"><span>検索</span></a>
+</p>
+
+</div>
+</form>
+
+<!--===== /header =====-->
+
+    <h2><img src="cp_data/toranoana/img/toranoana/title_mybookshelf@2x.png" width="102" height="30" alt="My本棚" />
+<span class="sort">
+<form name="sortForm" action="" method="GET">
+<input type="hidden" name="p" value="purchase">
+<input type="hidden" name="sort_Kbn" value="0">
+<input type="hidden" name="serch_word" value="">
+<input type="hidden" name="serch_kbn" value="0">
+<input type="hidden" name="is_desc" value="1">
+
+<select name="sort_Kbn" onchange="titleSearchSortChange()">
+	<option label="購入日順" value="0" selected="selected">購入日順</option>
+<option label="新着順" value="1">新着順</option>
+<option label="あいうえお順" value="2">あいうえお順</option>
+
+</select>
+
+
+<input type="radio" onChange="javascript:titleSearchSortChange();" value="1" checked name="is_desc">
+降順
+<input type="radio" onChange="javascript:titleSearchSortChange();" value="0"  name="is_desc">
+昇順
+</form>
+    </span>
+    </h2>
+</header>
+<div id="book_container">
+<div class="main">
+    <!--===== .main =====-->
+
+    <section>
+        <!-- .section -->
+
+    <ul class="link-list has-img">
+        	    				<li>
+            	<a href="index.php?p=detail&title_id=042000011150">
+                                                                                                                		<span class="img_box">
+                        <img src="https://s3-ap-northeast-1.amazonaws.com/toranoana/THUMBIMG_042000011150.jpg"/>
+                    </span>
+        			<em>
+        				俺のめんまメンマ！<br />
+                        サツキ足穂<br />
+        				焼酎MAC
+	        		</em>
+    	    	</a>
+    	    	<div class="btn_box">
+		                            <div id="add042000011150" class="fav_star"><a href="javascript:wish('042000011150', 'add');" class="btn-star"><img src="cp_data/toranoana/img/toranoana/pc_btn_fav_off@2x.png" alt="" width=53 height=51 /></a></div>
+                    <div id="del042000011150" style="display:none;" class="fav_star"><a href="javascript:wish('042000011150', 'del');" class="btn-star"><img src="cp_data/toranoana/img/toranoana/pc_btn_fav_on@2x.png" alt="" width=53 height=51 /></a></div>
+            	        		                                <div id="read_btn">
+                				                <a href="index.php?p=read&title_id=042000011150&return_page=%2Ftoraebook%2Findex.php%3Fp%3Dpurchase%26viewer_flg%3D1" class="btn-width-01"><!--読む--><img src="cp_data/toranoana/img/toranoana/pc_btn_reading_top@2x.png" alt="" width=83 height=50 /></a>
+                                                </div>
+                </div>
+		    </li>
+	            
+        	    				<li>
+            	<a href="index.php?p=detail&title_id=042000014123">
+                                                                                                                		<span class="img_box">
+                        <img src="https://s3-ap-northeast-1.amazonaws.com/toranoana/THUMBIMG_042000014123.jpg"/>
+                    </span>
+        			<em>
+        				肉便ちゃん<br />
+                        魔訶不思議<br />
+        				こどもぎんこう
+	        		</em>
+    	    	</a>
+    	    	<div class="btn_box">
+		                            <div id="add042000014123" class="fav_star"><a href="javascript:wish('042000014123', 'add');" class="btn-star"><img src="cp_data/toranoana/img/toranoana/pc_btn_fav_off@2x.png" alt="" width=53 height=51 /></a></div>
+                    <div id="del042000014123" style="display:none;" class="fav_star"><a href="javascript:wish('042000014123', 'del');" class="btn-star"><img src="cp_data/toranoana/img/toranoana/pc_btn_fav_on@2x.png" alt="" width=53 height=51 /></a></div>
+            	        		                                <div id="read_btn">
+                				                <a href="index.php?p=read&title_id=042000014123&return_page=%2Ftoraebook%2Findex.php%3Fp%3Dpurchase%26viewer_flg%3D1" class="btn-width-01"><!--読む--><img src="cp_data/toranoana/img/toranoana/pc_btn_reading_top@2x.png" alt="" width=83 height=50 /></a>
+                                                </div>
+                </div>
+		    </li>
+	            
+        	    				<li>
+            	<a href="index.php?p=detail&title_id=042000044227">
+                                                                                                                		<span class="img_box">
+                        <img src="https://s3-ap-northeast-1.amazonaws.com/toranoana/THUMBIMG_042000044227.jpg"/>
+                    </span>
+        			<em>
+        				魔法少女スターラビット　〜チ〇コ型モンスターに丸呑みされちゃった！？〜<br />
+                        SIS<br />
+        				八本木ヒルズ
+	        		</em>
+    	    	</a>
+    	    	<div class="btn_box">
+		                            <div id="add042000044227" class="fav_star"><a href="javascript:wish('042000044227', 'add');" class="btn-star"><img src="cp_data/toranoana/img/toranoana/pc_btn_fav_off@2x.png" alt="" width=53 height=51 /></a></div>
+                    <div id="del042000044227" style="display:none;" class="fav_star"><a href="javascript:wish('042000044227', 'del');" class="btn-star"><img src="cp_data/toranoana/img/toranoana/pc_btn_fav_on@2x.png" alt="" width=53 height=51 /></a></div>
+            	        		                                <div id="read_btn">
+                				                <a href="index.php?p=read&title_id=042000044227&return_page=%2Ftoraebook%2Findex.php%3Fp%3Dpurchase%26viewer_flg%3D1" class="btn-width-01"><!--読む--><img src="cp_data/toranoana/img/toranoana/pc_btn_reading_top@2x.png" alt="" width=83 height=50 /></a>
+                                                </div>
+                </div>
+		    </li>
+	            
+    </ul>
+
+<div id="pager">
+</div>
+
+</section>
+</div>
+</div>
+<footer>
+<!--=========== footer ============-->
+<div id="footer_s">
+        <html>
+<head><title>301 Moved Permanently</title></head>
+<body>
+<center><h1>301 Moved Permanently</h1></center>
+</body>
+</html>
+
+</div><p class="copyrights">&copy;2016 とらのあな電子書籍</p>
+
+<!--=========== /footer ============-->
+</footer>
+
+
+
+<!--=========== /.container ============-->
+</div>
+</body>
+
+<script>
+    window.addEventListener('load',function(){
+
+var maxHeight = 0;
+$("li").each(function(){
+if ($(this).height() > maxHeight) { maxHeight = $(this).height(); }
+});
+$("li").height(maxHeight);
+
+},false);
+</script>
+
+</html>
