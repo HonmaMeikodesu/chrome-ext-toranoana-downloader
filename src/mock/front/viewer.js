@@ -2648,6 +2648,7 @@ function initPreloadIMGFile() {
 	// initPreloadIMGFile end
 }
 
+// entry
 function loadImage(pagenum, dispFontSize, refresh, clearFlg, e) {
 
 	// set currentPage
@@ -2671,6 +2672,7 @@ function loadImage(pagenum, dispFontSize, refresh, clearFlg, e) {
 	currentPage = page;
 
 	// to canvas
+	// Second
 	displaypage(currentPage);
 
 	// old logic
@@ -5796,6 +5798,7 @@ function drawImage2Canvas(ctx, img, w, h, id, times) {
 		}
 		//newdebug_add(" w / json");
 	} else {
+		// 第一次取数据才走这条分支
 		// jsonの取得ができていない場合を考慮して再取得
 		var id2 = pi.realPage(id);
 		var info = getTargetHeaderInfo(id2 - 1);
@@ -5839,6 +5842,7 @@ function drawImage2Canvas(ctx, img, w, h, id, times) {
 			}).done(function(rjson, textStatus, jqXHR) {
 				if (rjson !== null) {
 					var rjsontext = JSON.stringify(rjson["x"], null, "");
+					// 往此处塞入结果，下面重新调一把drawImage2Cavas，又从divz中取出来消费
 					divj.text(rjsontext);
 					_loadingiconHide();
 				}
@@ -6324,6 +6328,7 @@ function getTargetHeaderInfo(page) {
 
 function getImageSync(showpage, called, nextFunc) {
 	//if (isSakiyomi(showpage)) {
+	// 别管这个分支，从缓存中读取渲染图片
 	if (hasDownloadedImage(showpage)) {
 		var copyimgArgs = {
 			id: showpage,
@@ -6341,8 +6346,10 @@ function getImageSync(showpage, called, nextFunc) {
 	var xhr = new XMLHttpRequest();
 	var showpage2 = pi.realPage(showpage);
 	var info = getTargetHeaderInfo(showpage2);
+	// !important!
 	var imgsrc = info["img"];
 	var json = info["x"];
+	// 到此为止，剩下的不用看了
 	var dummyurl = "/dummy?id=" + showpage;
 
 	var copyimgArgs = {
@@ -6371,6 +6378,7 @@ function displaypage(page) {
 	//canvasを作り直す
 	//setcanvas();
 
+	// 屏幕宽度相关
 	if (isLandscape() && !isUnit) {
 		sakiyomiPage++;
 		//getImageSync2(page);
@@ -6936,6 +6944,7 @@ function ios_height() {
 	return ret;
 }
 
+// 获取页面信息
 function pageInfo() {
 /*
 	var min = minpage;

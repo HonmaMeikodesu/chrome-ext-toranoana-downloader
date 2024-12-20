@@ -55,6 +55,7 @@ function urlInfo() {
 		splashImageUrl = splash;
 	}
 
+	// 这里要用到
 	var imageUrlfunc = function(img, drm) {
 		var url = "/image_php73.php?sp=" + p5 + "&x1=" + img + "&x2=" + drm + "&t=" + getRandom();
 		return url;
@@ -80,6 +81,7 @@ function urlInfo() {
 		bookInfo: xml.bookInfo,
 		headerInfo: xml.headerInfo,
 		errorInfo: xml.errorInfo,
+		// 有多少页都藏在xml的元数据描述里了
 		minpage: xml.minpage,
 		maxpage: xml.maxpage
 	};
@@ -116,6 +118,7 @@ function xmlInfo(params) {
 
 	// new
 	var bookallxmlurl = "/bookinfo_php73.php?" + p5;
+	// important
 	xmlLoad(bookallxmlurl, function(xml, status, xhr) {
 		var xc = xhr.getResponseHeader('X-Error-Code');
 		var xdef = xhr.getResponseHeader('X-Error-def');

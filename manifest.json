@@ -1,25 +1,41 @@
 {
-    "manifest_version": 3,
-    "name": "Toranoana Downloader",
-    "description": "downloader for toranoana online hondana",
-    "version": "1.0",
-    "action": {
-        "default_icon": "hello_extensions.png"
-    },
-    "permissions": [
-        "downloads", "activeTab", "scripting"
-    ],
-    "content_scripts": [
-        {
-            "matches": [
-                "https://viewer.toraebook.com/imageviewer/index.php/*"
-            ],
-            "js": [
-                "content-script.js"
-            ]
-        }
-    ],
-    "background": {
-        "service_worker": "background.js"
+  "manifest_version": 3,
+  "name": "Toranoana Downloader",
+  "description": "downloader for toranoana online hondana",
+  "version": "1.0",
+  "action": {
+    "default_icon": "hello_extensions.png",
+    "default_popup": "dist/index.html"
+  },
+  "permissions": [
+    "downloads"
+  ],
+  "host_permissions": [
+    "*://*.toraebook.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://viewer.toraebook.com/imageviewer/*",
+        "http://localhost:8088/*"
+      ],
+      "js": [
+        "dist/content.js"
+      ]
     }
+  ],
+  "background": {
+    "service_worker": "dist/background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "dist/popup.js"
+      ],
+      "matches": [
+        "*://viewer.toraebook.com/*",
+        "http://localhost:8088/*"
+      ]
+    }
+  ]
 }

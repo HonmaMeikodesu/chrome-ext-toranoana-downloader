@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+
+const { writeFileSync } = require("fs");
+const { resolve } = require("path");
+
+/** @type {chrome.runtime.ManifestV3} */
+const mainfestJson = {
+    manifest_version: 3,
+    name: "Toranoana Downloader",
+    description: "downloader for toranoana online hondana",
+    version: "1.0",
+    action: {
+        default_icon: "hello_extensions.png",
+        default_popup: "dist/index.html"
+    },
+    permissions: [
+        "downloads"
+    ],
+    host_permissions: [
+        "*://*.toraebook.com/*",
+    ],
+    content_scripts: 
+    [
+        {
+            matches: [
+                "*://viewer.toraebook.com/imageviewer/*",
+                "http://localhost:8088/*"
+            ],
+            js: [
+                "dist/content.js"
+            ]
+        }
+    ],
+    background: {
+        "service_worker": "dist/background.js"
+    },
+    web_accessible_resources: [
+        {
+            resources: [
+                "dist/popup.js"
+            ],
+            matches: ["*://viewer.toraebook.com/*", "http://localhost:8088/*"]
+        }
+    ]
+}
+
+writeFileSync(resolve(__dirname, "..", "manifest.json"), JSON.stringify(mainfestJson, null, 2));
