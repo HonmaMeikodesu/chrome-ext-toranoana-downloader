@@ -1,4 +1,4 @@
-import { xml2json } from "xml-js";
+import { xml2js } from "xml-js";
 import { ClassifedData } from "../types";
 
 export type BookInfo = {
@@ -59,7 +59,7 @@ export async function __xmlInfo(viewerData: ClassifedData) {
     const { p5 } = viewerData;
 
 	// new
-	const bookallxmlurl = "/bookinfo_php73.php?" + p5;
+	const bookallxmlurl = "https://viewer.toraebook.com/bookinfo_php73.php?" + p5;
 	// important
     const res = (await fetch(bookallxmlurl, { headers: { "Accept": "application/xml" } }));
     const xc = res.headers.get("X-Error-Code");
@@ -68,7 +68,7 @@ export async function __xmlInfo(viewerData: ClassifedData) {
         throw new Error(`Unexpected error code: ${xc}, error message: ${xdef}`);
     }
     const xml = await res.text();
-    const bookall = xml2json(xml);
+	const bookall = (xml2js(xml, { compact: true }) as any).book;
     const bookInfo: BookAll = bookall["bookInfo"];
     const headerInfo: HeaderInfo = bookall["hi"];
 

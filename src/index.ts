@@ -12,7 +12,7 @@ const bookList =  document.querySelectorAll<HTMLAnchorElement>("#book_container 
 
     ele.insertAdjacentElement("afterend", download);
 
-    const bookUrl = ele.href;
+    const bookUrl = ele.parentNode!.querySelector<HTMLAnchorElement>("#read_btn a")!.href;
 
     const bookTitle = ele.querySelector("em")?.textContent?.trim()?.replace(/\n\s*/g, "");
 
