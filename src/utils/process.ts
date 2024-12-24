@@ -88,11 +88,11 @@ export async function processBook(bookUrl: string, tab: chrome.tabs.Tab, options
 
         } catch (e) {
             console.error(e);
-            errorPageList.push(parseInt(n)) 
+            errorPageList.push(n) 
         }
     };
 
-    const pageNumList = headerInfo.pgs.pg.map(item => parseInt(item.n));
+    const pageNumList = headerInfo.pgs.pg.map(item => item.n);
 
     const targetPages = options?.pageNums ? options.pageNums.filter(pageNum => pageNumList.includes(pageNum)) : pageNumList;
 
@@ -111,7 +111,7 @@ export async function processBook(bookUrl: string, tab: chrome.tabs.Tab, options
     for(let i = 0; i < targetPages.length; i+=MULTI_WORKER_THREAD) {
         const targetBatch = targetPages.slice(i, i + MULTI_WORKER_THREAD);
         await Promise.all(targetBatch.map(async (pageNum) => {
-            await worker(headerInfo.pgs.pg.find(item => item.n === pageNum.toString())!);
+            await worker(headerInfo.pgs.pg.find(item => item.n === pageNum)!);
             remnantPages = remnantPages.filter(item => item !== pageNum);
         }));
         const elapsed = moment().diff(now, "minutes");

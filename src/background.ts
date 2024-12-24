@@ -89,4 +89,6 @@ chrome.runtime.onMessage.addListener(async (message: EventMessage<any>, sender, 
         setTaskList(taskList);
     }
 
+    return true;
+
 })

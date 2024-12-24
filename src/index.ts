@@ -1,4 +1,4 @@
-import { usePromisifyCb } from "./utils/common";
+import { convertBlobToBase64, usePromisifyCb } from "./utils/common";
 import { EventMessage, EventType } from "./utils/evt";
 
 const bookList =  document.querySelectorAll<HTMLAnchorElement>("#book_container .link-list > li > a");
@@ -31,10 +31,10 @@ function requestParseBook(bookUrl: string, initBookTitle: string) {
 }
 
 async function normImage(msg: EventMessage<EventType.NORM_IMAGE>) {
-    const { imageBuffer, x } = msg.payload;
+    const { imageBase64Str, x } = msg.payload;
     const canvas = document.createElement("canvas");
 
-    const imgBlob = new Blob([imageBuffer]);
+    const imgBlob = await ( await fetch(imageBase64Str) ).blob();
 
     const ctx = canvas.getContext("2d");
 
@@ -62,13 +62,13 @@ async function normImage(msg: EventMessage<EventType.NORM_IMAGE>) {
         );
     }
 
-    let ret: ArrayBuffer = new ArrayBuffer(0);
+    let ret: string = "";
 
     await usePromisifyCb((__, cb: BlobCallback) => {
         canvas.toBlob(cb);
     }, { params: null, cb: async (blob: Blob | null) => {
         if (!blob) throw new Error("Empty canvas data!");
-        ret = await blob.arrayBuffer();
+        ret = await convertBlobToBase64(blob)
     } })
 
     canvas.remove();
@@ -120,6 +120,7 @@ function eventMsgTypeGuard<T extends EventType>(msg: EventMessage<EventType>, ty
 chrome.runtime.onMessage.addListener((msg: EventMessage<EventType.NORM_IMAGE | EventType.PARSE_BOOK_META>, sender, sendResponse) => {
     if (eventMsgTypeGuard<EventType.NORM_IMAGE>(msg, EventType.NORM_IMAGE)) {
         normImage(msg).then(sendResponse);
+        return true;
     }
 
     if (eventMsgTypeGuard<EventType.PARSE_BOOK_META>(msg, EventType.PARSE_BOOK_META)) {

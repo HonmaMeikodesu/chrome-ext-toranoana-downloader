@@ -15,7 +15,8 @@ export default [
       "dist",
       "scripts",
       "webpack.config.js",
-      "output"
+      "output",
+      "server.js"
     ]
   },
   {files: ["**/*.js"], languageOptions: {sourceType: "script"}},

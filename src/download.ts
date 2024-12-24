@@ -1,6 +1,7 @@
 import { File } from "./types"
-import { usePromisifyCb } from "./utils/common";
+import { convertBlobToBase64, usePromisifyCb } from "./utils/common";
 import { EventMessage, EventMessageResponse, EventType } from "./utils/evt";
+
 export async function parseAndSave(fileInfo: File, tab: chrome.tabs.Tab) {
 
     const { accessDirective: dir, fileName } = fileInfo || {};
@@ -9,40 +10,38 @@ export async function parseAndSave(fileInfo: File, tab: chrome.tabs.Tab) {
 
     const img = await fetch(dir.image);
 
+    const resImgBlob = await img.blob();
+
+    const imgBase64Str = await convertBlobToBase64(resImgBlob);
+
     const normImageMsg: EventMessage<EventType.NORM_IMAGE> = {
         type: EventType.NORM_IMAGE,
         payload: {
-            imageBuffer: await img.arrayBuffer(),
+            imageBase64Str: imgBase64Str,
             x
         }
     }
 
-    let imgBlob: Blob = new Blob();
+    let imgDownloadUrl: string = "";
 
     await usePromisifyCb((params, cb) => {
         chrome.tabs.sendMessage(tab.id!, params, {}, cb)
     }, {
         params: normImageMsg,
         cb: (res: EventMessageResponse<EventType.NORM_IMAGE>) => {
-            if (res?.byteLength)  {
-                imgBlob = new Blob([res]);
+            if (res?.length) {
+                imgDownloadUrl = res;
             }
-            return Promise.resolve(imgBlob);
+            return Promise.resolve(imgDownloadUrl);
         }
     })
 
-    if (!imgBlob) { throw new Error("Receive Empty Image Blob!")};
-    
-    
-    const targetBlobUrl = URL.createObjectURL(imgBlob);
-
-    const ext = "jpg";
+    if (!imgDownloadUrl.length) { throw new Error("Receive Empty Image Blob!") };
 
     await chrome.downloads.download({
-        url: targetBlobUrl,
-        filename: `${fileName}.${ext}`,
+        url: imgDownloadUrl,
+        filename: fileName,
         conflictAction: "overwrite"
     });
 
-    URL.revokeObjectURL(targetBlobUrl);
 }

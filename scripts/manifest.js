@@ -24,7 +24,7 @@ const mainfestJson = {
         {
             matches: [
                 "*://books.toraebook.com/toraebook/*",
-                "http://localhost:8088/*"
+                "http://localhost:8080/*"
             ],
             js: [
                 "dist/content.js"
@@ -39,7 +39,7 @@ const mainfestJson = {
             resources: [
                 "dist/popup.js"
             ],
-            matches: ["*://*.toraebook.com/*", "http://localhost:8088/*"]
+            matches: ["*://*.toraebook.com/*", "http://localhost:8080/*"]
         }
     ]
 }

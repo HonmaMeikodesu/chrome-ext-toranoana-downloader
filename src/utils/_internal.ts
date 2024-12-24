@@ -1,4 +1,4 @@
-import { xml2js } from "xml-js";
+import { XMLParser } from "fast-xml-parser";
 import { ClassifedData } from "../types";
 
 export type BookInfo = {
@@ -8,14 +8,14 @@ export type BookInfo = {
 }
 
 export type HeaderInfo = {
-    num: string;
+    num: number;
     pgs: {
         pg: Array<{
 			// n and id should be equal
-			n: string;
-			id: string;
+			n: number;
+			id: number;
             img: string;
-            x: any
+            x: string
         }>
     }
 }
@@ -40,7 +40,7 @@ export async function __urlInfo(viewerData: ClassifedData) {
     const xml = await __xmlInfo({ p1, p2, p5 });
 
 
-	const imageUrlfunc = function(img, drm) {
+	const imageUrlfunc = function(img: string, drm: string) {
 		const url = "https://viewer.toraebook.com/image_php73.php?sp=" + p5 + "&x1=" + img + "&x2=" + drm + "&t=" + __getRandom();
 		return url;
 	}
@@ -68,7 +68,8 @@ export async function __xmlInfo(viewerData: ClassifedData) {
         throw new Error(`Unexpected error code: ${xc}, error message: ${xdef}`);
     }
     const xml = await res.text();
-	const bookall = (xml2js(xml, { compact: true }) as any).book;
+	const parser = new XMLParser({ ignoreAttributes: true, ignoreDeclaration: true, ignorePiTags: true });
+	const bookall = parser.parse(xml).book; 
     const bookInfo: BookAll = bookall["bookInfo"];
     const headerInfo: HeaderInfo = bookall["hi"];
 

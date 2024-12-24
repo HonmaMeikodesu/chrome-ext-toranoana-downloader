@@ -18,7 +18,7 @@ export const enum EventType {
     PARSE_BOOK_META = "parseBookMeta"
 }
 
-export type EventMessageResponse<T extends EventType> = T extends EventType.NORM_IMAGE ? ArrayBuffer : T extends EventType.PARSE_BOOK_META ? {
+export type EventMessageResponse<T extends EventType> = T extends EventType.NORM_IMAGE ? string : T extends EventType.PARSE_BOOK_META ? {
         p1: string,
         p2: string,
         p5: string,
@@ -52,7 +52,7 @@ export type EventMessage<T extends EventType> = {
             task?: Task
         }
     } : T extends EventType.NORM_IMAGE ? {
-        imageBuffer: ArrayBuffer,
+        imageBase64Str: string,
         x: Array<string | number>
     } : T extends EventType.PARSE_BOOK_META ? {
         viewerHtml: string

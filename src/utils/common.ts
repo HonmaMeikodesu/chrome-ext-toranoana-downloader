@@ -1,4 +1,14 @@
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+export async function convertBlobToBase64(blob: Blob): Promise<string> {
+    return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+            const base64data = reader.result;
+            resolve(base64data as string);
+        };
+    })
+}
+ 
 export function usePromisifyCb(func: (params: any, cb: any, errCb?: any) => void, data: { params: any, cb: (...args: any[]) => Promise<any>, errCb?: (...args: any[]) => Promise<any> }) {
     return new Promise((resolve, reject) => {
         const { cb, errCb, params } = data;

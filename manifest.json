@@ -17,7 +17,7 @@
     {
       "matches": [
         "*://books.toraebook.com/toraebook/*",
-        "http://localhost:8088/*"
+        "http://localhost:8080/*"
       ],
       "js": [
         "dist/content.js"
@@ -34,7 +34,7 @@
       ],
       "matches": [
         "*://*.toraebook.com/*",
-        "http://localhost:8088/*"
+        "http://localhost:8080/*"
       ]
     }
   ]
