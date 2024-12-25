@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import TaskList from "./taskList";
 import { EventMessage, EventMessageTypeGuard, EventType } from "../utils/evt";
 import { Task } from "../types";
-
+import "./root.css";
 export default function Root() {
     const [ tasks, setTasks  ] = useState<Task[]>([]);
     const refreshTaskList = useCallback(() => {

@@ -3,6 +3,9 @@ import { Task } from "../../types";
 import { ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined } from "@ant-design/icons";
 import { Button, Collapse, CollapseProps } from "antd";
 import { EventMessage, EventType } from "../../utils/evt";
+import cx from "classnames";
+
+import "./index.scss";
 
 type ComponentProps = {
     tasks: Task[]
@@ -26,7 +29,7 @@ export default function TaskList(props: ComponentProps) {
 
     const buildCollapseItems = useCallback(() => {
         const taskHeaderCls = "task-item-header";
-        const taskBodyCls = "task-body-header";
+        const taskBodyCls = "task-item-body";
         const ret: CollapseProps["items"] = (tasks || []).map((task) => {
             const { status, bookTitle, bookUrl, errorPageList } = task;
             return {
@@ -35,7 +38,7 @@ export default function TaskList(props: ComponentProps) {
                         <div className={ `${taskHeaderCls}-title` }>
                             {bookTitle}
                         </div>
-                        <div className={ `${taskHeaderCls}-status` }>{
+                        <div className={cx(`${taskHeaderCls}-status-${status}`, `${taskHeaderCls}-status`)}>{
                                 status === "pending" ? <ClockCircleOutlined />:
                                 status === "downloading" ? <LoadingOutlined spin={true} />:
                                 status === "done" ? <CheckCircleOutlined />:
@@ -60,7 +63,7 @@ export default function TaskList(props: ComponentProps) {
 
                                         ))
                                     }
-                                    <Button onClick={() => retry({ bookUrl, bookTitle, errorPageList })}>Click to retry</Button>
+                                    <Button type="text" onClick={() => retry({ bookUrl, bookTitle, errorPageList })}>Click to retry</Button>
                                 </>
 
                             )
