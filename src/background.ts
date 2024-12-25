@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener(async (message: EventMessage<any>, sender, 
                 break;
             case "get":
                 sendResponse(await getTaskList());
-                break;
+                return true;
             case "insert":
                 task && await insertToTaskList(task);
                 emitSyncTaskFlag = true;
@@ -88,7 +88,4 @@ chrome.runtime.onMessage.addListener(async (message: EventMessage<any>, sender, 
         }
         setTaskList(taskList);
     }
-
-    return true;
-
 })
