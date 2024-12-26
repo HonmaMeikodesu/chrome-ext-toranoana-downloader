@@ -3,6 +3,7 @@ import TaskList from "./taskList";
 import { EventMessage, EventMessageTypeGuard, EventType } from "../utils/evt";
 import { Task } from "../types";
 import "./root.css";
+import { Divider } from "antd";
 export default function Root() {
     const [ tasks, setTasks  ] = useState<Task[]>([]);
     const refreshTaskList = useCallback(() => {
@@ -26,11 +27,12 @@ export default function Root() {
         refreshTaskList();
     }, []);
     return (
-        <div className="task-list-container">
-            <div className="task-list-header">
+        <div className="popup-container">
+            <div className="popup-header">
                 <span>任务列表</span>
             </div>
-            <div className="task-list-body">
+            <Divider style={{ margin: "6px 0"}} />
+            <div className="popup-body">
                 <TaskList tasks={tasks} />
             </div>
         </div>

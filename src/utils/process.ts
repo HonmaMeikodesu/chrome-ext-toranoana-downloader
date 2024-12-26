@@ -4,6 +4,7 @@ import { __urlInfo, HeaderInfo } from "./_internal";
 import { EventMessage, EventMessageResponse, EventType } from "./evt";
 import moment from "moment";
 import { usePromisifyCb } from "./common";
+import { localEventBus, LocalEventMessage, LocalEventType } from "./localEventBus";
 
 const MULTI_WORKER_THREAD = 6;
 
@@ -96,15 +97,15 @@ export async function processBook(bookUrl: string, tab: chrome.tabs.Tab, options
 
     const targetPages = options?.pageNums ? options.pageNums.filter(pageNum => pageNumList.includes(pageNum)) : pageNumList;
 
-    const startDownloadMsg: EventMessage<EventType.START_DOWNLOAD> = {
-        type: EventType.START_DOWNLOAD,
+    const startDownloadMsg: LocalEventMessage<LocalEventType.START_DOWNLOAD> = {
+        type: LocalEventType.START_DOWNLOAD,
         payload: {
             bookUrl,
             bookTitle: title,
             pageList: targetPages 
         }
     };
-    chrome.runtime.sendMessage(startDownloadMsg);
+    localEventBus.emit(LocalEventType.START_DOWNLOAD, startDownloadMsg);
 
     let now = moment();
     let remnantPages = targetPages;
@@ -123,8 +124,8 @@ export async function processBook(bookUrl: string, tab: chrome.tabs.Tab, options
     }
 
     if (!isEmpty(errorPageList)) {
-        const downloadFailMsg: EventMessage<EventType.DOWNLOAD_ERROR> = {
-            type: EventType.DOWNLOAD_ERROR,
+        const downloadFailMsg: LocalEventMessage<LocalEventType.DOWNLOAD_ERROR> = {
+            type: LocalEventType.DOWNLOAD_ERROR,
             payload: {
                 bookUrl,
                 bookTitle: title,
@@ -132,12 +133,12 @@ export async function processBook(bookUrl: string, tab: chrome.tabs.Tab, options
             }
         };
 
-        chrome.runtime.sendMessage(downloadFailMsg);
+        localEventBus.emit(LocalEventType.DOWNLOAD_ERROR, downloadFailMsg);
         return;
     }
     
-    const downloadCompleteMsg: EventMessage<EventType.DOWNLOAD_COMPLETE> = {
-        type: EventType.DOWNLOAD_COMPLETE,
+    const downloadCompleteMsg: LocalEventMessage<LocalEventType.DOWNLOAD_COMPLETE> = {
+        type: LocalEventType.DOWNLOAD_COMPLETE,
         payload: {
             bookUrl,
             bookTitle: title,
@@ -145,7 +146,7 @@ export async function processBook(bookUrl: string, tab: chrome.tabs.Tab, options
         }
     };
 
-    chrome.runtime.sendMessage(downloadCompleteMsg);
+    localEventBus.emit(LocalEventType.DOWNLOAD_COMPLETE, downloadCompleteMsg);
 }
 
 

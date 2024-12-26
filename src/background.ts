@@ -1,4 +1,5 @@
 import { EventMessage, EventMessageTypeGuard, EventType } from "./utils/evt";
+import { localEventBus, LocalEventMessage, LocalEventType } from "./utils/localEventBus";
 import { processBook } from "./utils/process";
 import { getTaskList, setTaskList, insertToTaskList, removeFromTaskList, initTaskDB } from "./utils/storageManage";
 
@@ -8,41 +9,32 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 chrome.runtime.onMessage.addListener((message: EventMessage<any>, sender, sendResponse) => {
 
-    const { bookUrl, bookTitle } = (message?.payload || {}) as unknown as EventMessage<EventType.START_DOWNLOAD>["payload"] || {};
 
-    if (EventMessageTypeGuard<EventType.REDUCE_TASK_LIST>(message, EventType.REDUCE_TASK_LIST) && message.payload.action === "get") {
-        getTaskList().then((taskList) => {
-            sendResponse(taskList);
-        });
-        return true;
+    if (EventMessageTypeGuard<EventType.REDUCE_TASK_LIST>(message, EventType.REDUCE_TASK_LIST)) {
+        const { action, payload } = message.payload;
+        const { task, taskList } = payload;
+
+        switch (action) {
+            case "get":
+                getTaskList().then((taskList) => {
+                    sendResponse(taskList);
+                });
+                return true;
+            case "set":
+                taskList && setTaskList(taskList);
+                break;
+            case "insert":
+                task && insertToTaskList(task);
+                break;
+            case "remove":
+                task && removeFromTaskList(task);
+                break;
+        }
     }
 
     (async () => {
-        if (EventMessageTypeGuard<EventType.REDUCE_TASK_LIST>(message, EventType.REDUCE_TASK_LIST)) {
-            const { action, payload } = message.payload;
-            const { task, taskList } = payload;
-            let emitSyncTaskFlag = false;
-
-            switch (action) {
-                case "set":
-                    taskList && await setTaskList(taskList);
-                    emitSyncTaskFlag = true;
-                    break;
-                case "insert":
-                    task && await insertToTaskList(task);
-                    emitSyncTaskFlag = true;
-                    break;
-                case "remove":
-                    task && await removeFromTaskList(task);
-                    emitSyncTaskFlag = true;
-                    break;
-            }
-
-            if (emitSyncTaskFlag) {
-                chrome.runtime.sendMessage({ type: EventType.SYNC_TASK_LIST });
-            }
-        }
         if (EventMessageTypeGuard<EventType.PARSE_BOOK>(message, EventType.PARSE_BOOK)) {
+            const { bookTitle, bookUrl } = message.payload;
             const taskList = await getTaskList();
             const book = taskList.find(item => item.bookUrl === bookUrl);
             if (book) {
@@ -52,45 +44,50 @@ chrome.runtime.onMessage.addListener((message: EventMessage<any>, sender, sendRe
                 taskList.push({ bookUrl, bookTitle, status: "pending" });
             }
             setTaskList(taskList);
+            // FIXME retry scenario
             await processBook(bookUrl, sender.tab!, { pageNums: message.payload.pageList });
         }
-        if (EventMessageTypeGuard<EventType.START_DOWNLOAD>(message, EventType.START_DOWNLOAD)) {
-            const taskList = await getTaskList();
-            const book = taskList.find(item => item.bookUrl === bookUrl);
-            if (book) {
-                book.status = "downloading";
-                book.bookTitle = bookTitle;
-            } else {
-                taskList.push({ bookUrl, bookTitle, status: "downloading" });
-            }
-            setTaskList(taskList);
-        }
-
-        if (EventMessageTypeGuard<EventType.DOWNLOAD_COMPLETE>(message, EventType.DOWNLOAD_COMPLETE)) {
-            const taskList = await getTaskList();
-            const book = taskList.find(item => item.bookUrl === bookUrl);
-            if (book) {
-                book.status = "done"
-                book.bookTitle = bookTitle;
-            } else {
-                console.warn("download complete but not found in task list");
-                taskList.push({ bookUrl, bookTitle, status: "done" })
-            }
-            setTaskList(taskList);
-        }
-
-        if (EventMessageTypeGuard<EventType.DOWNLOAD_ERROR>(message, EventType.DOWNLOAD_ERROR)) {
-            const taskList = await getTaskList();
-            const book = taskList.find(item => item.bookUrl === bookUrl);
-            if (book) {
-                book.status = "error";
-                book.bookTitle = bookTitle;
-                book.errorPageList = message.payload.errorPageList;
-            } else {
-                console.warn("download complete but not found in task list");
-                taskList.push({ bookUrl, bookTitle, status: "done" })
-            }
-            setTaskList(taskList);
-        }
     })()
+})
+
+localEventBus.on(LocalEventType.START_DOWNLOAD, async (message: LocalEventMessage<LocalEventType.START_DOWNLOAD>) => {
+    const { bookUrl, bookTitle } =  message.payload
+    const taskList = await getTaskList();
+    const book = taskList.find(item => item.bookUrl === bookUrl);
+    if (book) {
+        book.status = "downloading";
+        book.bookTitle = bookTitle;
+    } else {
+        taskList.push({ bookUrl, bookTitle, status: "downloading" });
+    }
+    setTaskList(taskList);
+})
+
+localEventBus.on(LocalEventType.DOWNLOAD_COMPLETE, async (message: LocalEventMessage<LocalEventType.DOWNLOAD_COMPLETE>) => {
+    const { bookUrl, bookTitle } = message.payload;
+    const taskList = await getTaskList();
+    const book = taskList.find(item => item.bookUrl === bookUrl);
+    if (book) {
+        book.status = "done"
+        book.bookTitle = bookTitle;
+    } else {
+        console.warn("download complete but not found in task list");
+        taskList.push({ bookUrl, bookTitle, status: "done" })
+    }
+    setTaskList(taskList);
+})
+
+localEventBus.on(LocalEventType.DOWNLOAD_ERROR, async (message: LocalEventMessage<LocalEventType.DOWNLOAD_ERROR>) => {
+    const { bookTitle, bookUrl, errorPageList } = message.payload;
+    const taskList = await getTaskList();
+    const book = taskList.find(item => item.bookUrl === bookUrl);
+    if (book) {
+        book.status = "error";
+        book.bookTitle = bookTitle;
+        book.errorPageList = errorPageList;
+    } else {
+        console.warn("download complete but not found in task list");
+        taskList.push({ bookUrl, bookTitle, status: "done" })
+    }
+    setTaskList(taskList);
 })

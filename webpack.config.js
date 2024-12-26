@@ -34,6 +34,13 @@ const webConfig = {
                 },
             },
             {
+                test: /\.css$/i,
+                use: [
+                    "style-loader",
+                    "css-loader"
+                ],
+            },
+            {
                 test: /\.s[ac]ss$/i,
                 use: [
                     // Creates `style` nodes from JS strings
@@ -43,7 +50,7 @@ const webConfig = {
                     // Compiles Sass to CSS
                     "sass-loader",
                 ],
-              }
+            },
         ],
     },
     devtool: false,

@@ -6,9 +6,6 @@ export const EventMessageTypeGuard = <T extends EventType>(message: EventMessage
 
 export const enum EventType {
     PARSE_BOOK = "parseBook",
-    START_DOWNLOAD = "startDownload",
-    DOWNLOAD_COMPLETE = "downloadComplete",
-    DOWNLOAD_ERROR = "downloadError",
 
     REDUCE_TASK_LIST = "reduceTaskList",
     SYNC_TASK_LIST = "syncTaskList",
@@ -32,18 +29,6 @@ export type EventMessage<T extends EventType> = {
         bookUrl: string
         bookTitle: string
         pageList?: number[]
-    } : T extends EventType.START_DOWNLOAD ? {
-        bookUrl: string,
-        bookTitle: string
-        pageList: number[]
-    } : T extends EventType.DOWNLOAD_COMPLETE ? {
-        bookUrl: string,
-        bookTitle: string
-        pageList: number[]
-    } : T extends EventType.DOWNLOAD_ERROR ? {
-        bookUrl: string,
-        bookTitle: string
-        errorPageList: number[]
     } : T extends EventType.REDUCE_TASK_LIST ? {
         action: "set" | "get" | "insert" | "remove"
         payload: {

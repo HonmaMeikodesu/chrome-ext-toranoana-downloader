@@ -1,31 +1,41 @@
 .task-list-container {
-    padding: 8px;
-    box-sizing: border-box;
-    height: 600px;
-    width: 800px;
-}
+    .task-item-header {
+        display: flex;
+        align-items: center;
 
-.task-item-header {
-    display: flex;
-    align-items: center;
-
-    &-status {
-        margin-left: 8px;
-        &-pending {
-
+        &-title {
+            color: rgba(0,0,0, 0.88) !important
         }
-        &-downloading {
-
+    
+        &-status {
+            margin-left: 8px;
+            &-pending {
+                color: #faad14
+            }
+            &-downloading {
+                color: #1677ff
+            }
+            &-done {
+                color: #52c41a
+            }
+            &-error {
+                color: #ff4d4f;
+            }
         }
-        &-done {
-
-        }
-        &-error {
-
-        }
+    }
+    
+    .task-item-body {
+    
     }
 }
 
-.task-item-body {
 
+.task-list-empty {
+    font-size: 20px;
+    color: #999;
+    font-weight: bold;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }

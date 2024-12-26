@@ -4,7 +4,7 @@
 		<previewInfo>
 			<sizeInfo>
 				<size>1</size>
-				<totalPage>66</totalPage>
+				<totalPage>9</totalPage>
 			</sizeInfo>
 		</previewInfo>
 		<contentType>2</contentType>
@@ -18,7 +18,7 @@
 		</authors>
 	</bookInfo>
 	<hi>
-		<num>66</num>
+		<num>9</num>
 		<is>
 			<!-- don't use -->
 			<h>0</h>
@@ -124,7 +124,7 @@
 				<img>e50077f259d508d930daa00da218044e9674401424e8782e3467482a3db1a5da</img>
 				<x>77346f29fc8d8a4e8a84ee67ff04e51e36833094eb3ee89b364cb6134532aafe</x>
 			</pg>
-			<pg>
+			<!-- <pg>
 				<n>10</n>
 				<id>10</id>
 				<s>0</s>
@@ -750,7 +750,7 @@
 				<b>0</b>
 				<img>e63dc464365dd10806ea25f269a0cc64c9cd151eb6bc511a1f3e05f6aab1666d</img>
 				<x>3c0db59c8fda12d81599874cff9c9ce1b61b3a412a03875e4810cf3a055df503</x>
-			</pg>
+			</pg> -->
 		</pgs>
 	</hi>
 </book>

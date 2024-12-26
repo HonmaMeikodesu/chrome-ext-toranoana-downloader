@@ -39,14 +39,14 @@ export default function TaskList(props: ComponentProps) {
                             {bookTitle}
                         </div>
                         <div className={cx(`${taskHeaderCls}-status-${status}`, `${taskHeaderCls}-status`)}>{
-                                status === "pending" ? <ClockCircleOutlined />:
+                                status === "pending" ? <ClockCircleOutlined  />:
                                 status === "downloading" ? <LoadingOutlined spin={true} />:
-                                status === "done" ? <CheckCircleOutlined />:
+                                    status === "done" ? <CheckCircleOutlined /> :
                                 status === "error" ? <CloseCircleOutlined />: ""
                         }</div>
                     </div>
                 ),
-                showArrow: !errorPageList?.length,
+                showArrow: !!errorPageList?.length,
                 collapsible: !errorPageList?.length ? "disabled" : "header", 
                 children: (
                     <div className={taskBodyCls}>
@@ -78,7 +78,15 @@ export default function TaskList(props: ComponentProps) {
 
     return (
         <div className="task-list-container">
-            <Collapse items={buildCollapseItems()} />
+            {
+                tasks.length ? (
+                    <Collapse ghost={true} items={buildCollapseItems()} />
+                ) : (
+                    <div className="task-list-empty">
+                        No task
+                    </div>
+                )
+            }
         </div>
     )
 }

@@ -2,6 +2,7 @@
 import { Task } from "../types.js";
 // @ts-expect-error ignore this ts error, this module INDEED has a CJS entry, checkout out its main field in package.json
 import { openDB, IDBPDatabase } from "idb";
+import { EventType } from "./evt.js";
 
 const DB_NAME = "toranoana-db";
 const TASK_STORE_NAME = "taskStore";
@@ -31,8 +32,6 @@ export async function getTaskList(): Promise<Task[]> {
     return tasks || [];
 }
 
-
-
 export async function setTaskList(taskList: Task[]) {
     const db = await getDbHandle();
     const store = db.transaction(TASK_STORE_NAME, "readwrite").store;
@@ -40,16 +39,19 @@ export async function setTaskList(taskList: Task[]) {
     for (const task of taskList) {
         await store.add(task);
     }
+    chrome.runtime.sendMessage({ type: EventType.SYNC_TASK_LIST });
 }
 
 export async function insertToTaskList(task: Task) {
     const db = await getDbHandle();
     const store = db.transaction(TASK_STORE_NAME, "readwrite").store;
     await store.put(task);
+    chrome.runtime.sendMessage({ type: EventType.SYNC_TASK_LIST });
 }
 
 export async function removeFromTaskList(task: Task) {
     const db = await getDbHandle();
     const store = db.transaction(TASK_STORE_NAME, "readwrite").store;
     await store.delete(task.bookUrl);
+    chrome.runtime.sendMessage({ type: EventType.SYNC_TASK_LIST });
 }
