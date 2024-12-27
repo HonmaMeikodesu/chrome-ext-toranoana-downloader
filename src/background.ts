@@ -44,7 +44,18 @@ chrome.runtime.onMessage.addListener((message: EventMessage<any>, sender, sendRe
                 taskList.push({ bookUrl, bookTitle, status: "pending" });
             }
             setTaskList(taskList);
-            await processBook(bookUrl, { pageNums: message.payload.pageList });
+            try {
+                await processBook(bookUrl, { pageNums: message.payload.pageList });
+            } catch (e) {
+                console.error(e);
+                const downloadFatalMsg: LocalEventMessage<LocalEventType.DOWNLOAD_FATAL> = {
+                    payload: {
+                        bookUrl,
+                        bookTitle
+                    }
+                };
+                localEventBus.emit(LocalEventType.DOWNLOAD_FATAL, downloadFatalMsg);
+            }
         }
     })()
 })
@@ -70,7 +81,6 @@ localEventBus.on(LocalEventType.DOWNLOAD_COMPLETE, async (message: LocalEventMes
         book.status = "done"
         book.bookTitle = bookTitle;
     } else {
-        console.warn("download complete but not found in task list");
         taskList.push({ bookUrl, bookTitle, status: "done" })
     }
     setTaskList(taskList);
@@ -85,8 +95,20 @@ localEventBus.on(LocalEventType.DOWNLOAD_ERROR, async (message: LocalEventMessag
         book.bookTitle = bookTitle;
         book.errorPageList = errorPageList;
     } else {
-        console.warn("download complete but not found in task list");
-        taskList.push({ bookUrl, bookTitle, status: "done" })
+        taskList.push({ bookUrl, bookTitle, status: "error", errorPageList })
+    }
+    setTaskList(taskList);
+})
+
+localEventBus.on(LocalEventType.DOWNLOAD_FATAL, async (message: LocalEventMessage<LocalEventType.DOWNLOAD_FATAL>) => {
+    const { bookTitle, bookUrl } = message.payload;
+    const taskList = await getTaskList();
+    const book = taskList.find(item => item.bookUrl === bookUrl);
+    if (book) {
+        book.status = "fatal";
+        book.bookTitle = bookTitle;
+    } else {
+        taskList.push({ bookUrl, bookTitle, status: "fatal" })
     }
     setTaskList(taskList);
 })

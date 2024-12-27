@@ -1,16 +1,31 @@
 .task-list-container {
+    .ant-collapse-expand-icon {
+        height: 32px !important;
+    }
+    .ant-collapse-header {
+        padding: 0 !important;
+    }
+
+    .ant-collapse-header-text {
+        max-width: calc(100% - 24px) !important;
+    }
     .task-item-header {
         display: flex;
         align-items: center;
 
         &-title {
-            color: rgba(0,0,0, 0.88) !important
+            color: rgba(0,0,0, 0.88) !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0
         }
     
         &-status {
+            flex-shrink: 0;
+            flex-grow: 0;
             margin-left: 8px;
             &-pending {
-                color: #faad14
             }
             &-downloading {
                 color: #1677ff
@@ -19,13 +34,29 @@
                 color: #52c41a
             }
             &-error {
-                color: #ff4d4f;
+                color: #ffcc00;
             }
+            &-fatal {
+                color: #f5222d;;
+            }
+        }
+
+        &-retry {
         }
     }
     
     .task-item-body {
-    
+        line-break: anywhere;
+        &-error-page {
+            font-weight: 600;
+            font-size: 16px;
+            color: crimson;
+        }
+
+        &-fatal {
+            font-size: 18px;
+            color: crimson
+        }
     }
 }
 

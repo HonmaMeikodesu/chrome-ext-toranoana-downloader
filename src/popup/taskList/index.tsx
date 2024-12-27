@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { Task } from "../../types";
-import { ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined } from "@ant-design/icons";
+import { ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined, BugOutlined } from "@ant-design/icons";
 import { Button, Collapse, CollapseProps } from "antd";
 import { EventMessage, EventType } from "../../utils/evt";
 import cx from "classnames";
@@ -14,7 +14,7 @@ type ComponentProps = {
 export default function TaskList(props: ComponentProps) {
     const { tasks } = props;
 
-    const retry = useCallback((params: { bookUrl: string, bookTitle: string, errorPageList: number[] }) => {
+    const retry = useCallback((params: { bookUrl: string, bookTitle: string, errorPageList?: number[] }) => {
         const { bookTitle, bookUrl, errorPageList } = params;
         const retryMsg: EventMessage<EventType.PARSE_BOOK> = {
             type: EventType.PARSE_BOOK,
@@ -32,43 +32,47 @@ export default function TaskList(props: ComponentProps) {
         const taskBodyCls = "task-item-body";
         const ret: CollapseProps["items"] = (tasks || []).map((task) => {
             const { status, bookTitle, bookUrl, errorPageList } = task;
+            const isExceptional = status === "error" || status === "fatal";
             return {
                 label: (
                     <div className={taskHeaderCls}>
-                        <div className={ `${taskHeaderCls}-title` }>
+                        <div className={ `${taskHeaderCls}-title` } title={bookTitle}>
                             {bookTitle}
                         </div>
                         <div className={cx(`${taskHeaderCls}-status-${status}`, `${taskHeaderCls}-status`)}>{
                                 status === "pending" ? <ClockCircleOutlined  />:
                                 status === "downloading" ? <LoadingOutlined spin={true} />:
                                     status === "done" ? <CheckCircleOutlined /> :
-                                status === "error" ? <CloseCircleOutlined />: ""
+                                status === "error" ? <CloseCircleOutlined /> :
+                                status === "fatal" ? <BugOutlined /> : ""
                         }</div>
+                        {isExceptional && <Button className={`${taskHeaderCls}-retry`} type="link" onClick={() => retry({ bookUrl, bookTitle, errorPageList: status === "error" ? errorPageList : undefined })}>重试</Button>}
                     </div>
                 ),
-                showArrow: !!errorPageList?.length,
-                collapsible: !errorPageList?.length ? "disabled" : "header", 
+                showArrow: isExceptional,
+                collapsible: !isExceptional ? "disabled" : "header", 
                 children: (
                     <div className={taskBodyCls}>
                         {
-                            errorPageList?.length && (
+                            status === "error" && errorPageList?.length && (
                                 <>
-                                    <span>Download Fail for pages: </span>
+                                    <span>以下页码下载失败: </span>
                                     {
-                                        errorPageList.map((pageNum) => (
+                                        errorPageList.map((pageNum, idx) => (
                                             <>
                                                 <span className={`${taskBodyCls}-error-page`}>{pageNum}</span>
-                                                <span>,</span>
+                                                {idx < errorPageList.length - 1 && <span>, </span>}
                                             </>
 
                                         ))
                                     }
-                                    <Button type="text" onClick={() => retry({ bookUrl, bookTitle, errorPageList })}>Click to retry</Button>
                                 </>
 
                             )
                         }
-                        
+                        {
+                            status === "fatal" && <div className={`${taskBodyCls}-fatal`}>系统异常，请重试</div>
+                        }
                     </div>
                 )
             }
@@ -83,7 +87,7 @@ export default function TaskList(props: ComponentProps) {
                     <Collapse ghost={true} items={buildCollapseItems()} />
                 ) : (
                     <div className="task-list-empty">
-                        No task
+                        暂无任务
                     </div>
                 )
             }

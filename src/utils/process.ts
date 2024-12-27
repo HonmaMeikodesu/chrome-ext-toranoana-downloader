@@ -113,7 +113,6 @@ export async function processBook(bookUrl: string, options?: { pageNums?: number
     const targetPages = options?.pageNums ? options.pageNums.filter(pageNum => pageNumList.includes(pageNum)) : pageNumList;
 
     const startDownloadMsg: LocalEventMessage<LocalEventType.START_DOWNLOAD> = {
-        type: LocalEventType.START_DOWNLOAD,
         payload: {
             bookUrl,
             bookTitle: title,
@@ -140,7 +139,6 @@ export async function processBook(bookUrl: string, options?: { pageNums?: number
 
     if (!isEmpty(errorPageList)) {
         const downloadFailMsg: LocalEventMessage<LocalEventType.DOWNLOAD_ERROR> = {
-            type: LocalEventType.DOWNLOAD_ERROR,
             payload: {
                 bookUrl,
                 bookTitle: title,
@@ -153,7 +151,6 @@ export async function processBook(bookUrl: string, options?: { pageNums?: number
     }
     
     const downloadCompleteMsg: LocalEventMessage<LocalEventType.DOWNLOAD_COMPLETE> = {
-        type: LocalEventType.DOWNLOAD_COMPLETE,
         payload: {
             bookUrl,
             bookTitle: title,
