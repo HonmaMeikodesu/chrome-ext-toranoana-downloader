@@ -44,8 +44,7 @@ chrome.runtime.onMessage.addListener((message: EventMessage<any>, sender, sendRe
                 taskList.push({ bookUrl, bookTitle, status: "pending" });
             }
             setTaskList(taskList);
-            // FIXME retry scenario
-            await processBook(bookUrl, sender.tab!, { pageNums: message.payload.pageList });
+            await processBook(bookUrl, { pageNums: message.payload.pageList });
         }
     })()
 })

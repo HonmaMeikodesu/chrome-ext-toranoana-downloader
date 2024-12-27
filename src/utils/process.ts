@@ -1,25 +1,30 @@
 import { isEmpty } from "lodash";
 import { parseAndSave } from "../download";
 import { __urlInfo, HeaderInfo } from "./_internal";
-import { EventMessage, EventMessageResponse, EventType } from "./evt";
 import moment from "moment";
-import { usePromisifyCb } from "./common";
 import { localEventBus, LocalEventMessage, LocalEventType } from "./localEventBus";
+// @ts-expect-error this module HAS commonJs entry
+import { parseHTML } from "linkedom";
 
 const MULTI_WORKER_THREAD = 6;
 
 const EXPIRE_MINS = 5;
 
 
-export async function requestBookAccess(bookUrl: string, tab: chrome.tabs.Tab) {
-    const response = await fetch(bookUrl, { credentials: "include", redirect: "follow" });
-    const viewerHtml = await response.text();
+function parseBookMeta(viewerHtml: string) {
 
-    const parseBookMetaMsg: EventMessage<EventType.PARSE_BOOK_META> = {
-        type: EventType.PARSE_BOOK_META,
-        payload: {
-            viewerHtml
-        }
+    const fakeWin = parseHTML(viewerHtml)
+
+    const viewerHtmlDom = fakeWin.document;
+
+    const inlineScripts = viewerHtmlDom.querySelectorAll("script[type='text/javascript']");
+
+    const regex = {
+        p1: /const\s+p1\s*=\s*"([^"]+)";/,
+        p2: /const\s+p2\s*=\s*"([^"]+)";/,
+        p5: /const\s+p5\s*=\s*"([^"]+)";/,
+        p7: /const\s+p7\s*=\s*"([^"]+)";/,
+        p8: /const\s+p8\s*=\s*"([^"]+)";/
     };
 
     let p1: string = "";
@@ -28,19 +33,29 @@ export async function requestBookAccess(bookUrl: string, tab: chrome.tabs.Tab) {
     let title: string = "";
     let author: string = "";
 
-    await usePromisifyCb((params: string, cb) => {
-        chrome.tabs.sendMessage(tab.id!, params, {}, cb);
-    }, {
-        params: parseBookMetaMsg,
-        cb: (res: EventMessageResponse<EventType.PARSE_BOOK_META>) => {
-            p1 = res.p1;
-            p2 = res.p2;
-            p5 = res.p5;
-            title = res.title;
-            author = res.author;
-            return Promise.resolve(res)
-        }
-    })
+    [...inlineScripts].forEach(script => {
+        if (p1 || p2 || p5) return;
+        p1 = script.textContent?.match(regex.p1)?.[1] ?? "";
+        p2 = script.textContent?.match(regex.p2)?.[1] ?? "";
+        p5 = script.textContent?.match(regex.p5)?.[1] ?? "";
+        title = script.textContent?.match(regex.p7)?.[1] ?? "";
+        author = script.textContent?.match(regex.p8)?.[1] ?? "";
+    });
+
+    return {
+        p1,
+        p2,
+        p5,
+        title: title ?? viewerHtmlDom?.title,
+        author
+    }
+}
+
+export async function requestBookAccess(bookUrl: string) {
+    const response = await fetch(bookUrl, { credentials: "include", redirect: "follow" });
+    const viewerHtml = await response.text();
+
+    const { p1, p2, p5, title, author } = parseBookMeta(viewerHtml);
 
     const { imageUrl, headerInfo } = await __urlInfo({ p1, p2, p5 });
 
@@ -55,9 +70,9 @@ export async function requestBookAccess(bookUrl: string, tab: chrome.tabs.Tab) {
     }
 }
 
-export async function processBook(bookUrl: string, tab: chrome.tabs.Tab, options?: { pageNums?: number[] }) {
+export async function processBook(bookUrl: string, options?: { pageNums?: number[] }) {
 
-    const { imageUrl, headerInfo, title, author } = await requestBookAccess(bookUrl, tab);
+    const { imageUrl, headerInfo, title, author } = await requestBookAccess(bookUrl);
 
     const parentDirectory = `${title}${author ? `(${author})` : ""}`;
 
@@ -85,7 +100,7 @@ export async function processBook(bookUrl: string, tab: chrome.tabs.Tab, options
                     image: rimgsrc,
                     x: rjsonx
                 }
-            }, tab)
+            })
 
         } catch (e) {
             console.error(e);
@@ -117,7 +132,7 @@ export async function processBook(bookUrl: string, tab: chrome.tabs.Tab, options
         }));
         const elapsed = moment().diff(now, "minutes");
         if (elapsed > EXPIRE_MINS) {
-            const { headerInfo: nextHeaderInfo } = await requestBookAccess(bookUrl, tab);
+            const { headerInfo: nextHeaderInfo } = await requestBookAccess(bookUrl);
             headerInfo.pgs = nextHeaderInfo.pgs;
             now = moment();
         }

@@ -1,8 +1,7 @@
 import { File } from "./types"
-import { convertBlobToBase64, usePromisifyCb } from "./utils/common";
-import { EventMessage, EventMessageResponse, EventType } from "./utils/evt";
+import { convertBlobToBase64 } from "./utils/common";
 
-export async function parseAndSave(fileInfo: File, tab: chrome.tabs.Tab) {
+export async function parseAndSave(fileInfo: File) {
 
     const { accessDirective: dir, fileName } = fileInfo || {};
 
@@ -10,31 +9,33 @@ export async function parseAndSave(fileInfo: File, tab: chrome.tabs.Tab) {
 
     const img = await fetch(dir.image);
 
-    const resImgBlob = await img.blob();
+    const imgBlob = await img.blob();
 
-    const imgBase64Str = await convertBlobToBase64(resImgBlob);
+    const imgFile = await createImageBitmap(imgBlob);
 
-    const normImageMsg: EventMessage<EventType.NORM_IMAGE> = {
-        type: EventType.NORM_IMAGE,
-        payload: {
-            imageBase64Str: imgBase64Str,
-            x
-        }
+    const canvas = new OffscreenCanvas(imgFile.width, imgFile.height);
+
+    const ctx = canvas.getContext("2d");
+
+    const blocksw = x[0][0];
+    const blocksh = x[0][1];
+
+    for (let cnt = 1; cnt <= blocksw * blocksh; cnt++) {
+        const sx = parseInt(x[cnt][2]);
+        const sy = parseInt(x[cnt][3]);
+        const sw = parseInt(x[cnt][4]);
+        const sh = parseInt(x[cnt][5]);
+        const dx = parseInt(x[cnt][0]);
+        const dy = parseInt(x[cnt][1]);
+        const dw = sw;
+        const dh = sh;
+
+        ctx!.drawImage(imgFile,
+            sx, sy, sw, sh, dx, dy, dw, dh
+        );
     }
 
-    let imgDownloadUrl: string = "";
-
-    await usePromisifyCb((params, cb) => {
-        chrome.tabs.sendMessage(tab.id!, params, {}, cb)
-    }, {
-        params: normImageMsg,
-        cb: (res: EventMessageResponse<EventType.NORM_IMAGE>) => {
-            if (res?.length) {
-                imgDownloadUrl = res;
-            }
-            return Promise.resolve(imgDownloadUrl);
-        }
-    })
+    const imgDownloadUrl = await convertBlobToBase64(await canvas.convertToBlob()) 
 
     if (!imgDownloadUrl.length) { throw new Error("Receive Empty Image Blob!") };
 
