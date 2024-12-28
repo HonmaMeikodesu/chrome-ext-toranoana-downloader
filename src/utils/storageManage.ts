@@ -42,16 +42,21 @@ export async function setTaskList(taskList: Task[]) {
     chrome.runtime.sendMessage({ type: EventType.SYNC_TASK_LIST });
 }
 
-export async function insertToTaskList(task: Task) {
+export async function insertToTaskList(tasks: Task[]) {
     const db = await getDbHandle();
     const store = db.transaction(TASK_STORE_NAME, "readwrite").store;
-    await store.put(task);
+    for (const task of tasks) {
+        await store.put(task);
+    }
+
     chrome.runtime.sendMessage({ type: EventType.SYNC_TASK_LIST });
 }
 
-export async function removeFromTaskList(task: Task) {
+export async function removeFromTaskList(tasks: Task[]) {
     const db = await getDbHandle();
     const store = db.transaction(TASK_STORE_NAME, "readwrite").store;
-    await store.delete(task.bookUrl);
+    for (const task of tasks) {
+        await store.delete(task.bookUrl);
+    }
     chrome.runtime.sendMessage({ type: EventType.SYNC_TASK_LIST });
 }

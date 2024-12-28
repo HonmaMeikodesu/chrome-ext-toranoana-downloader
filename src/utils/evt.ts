@@ -9,6 +9,8 @@ export const enum EventType {
 
     REDUCE_TASK_LIST = "reduceTaskList",
     SYNC_TASK_LIST = "syncTaskList",
+
+    OPEN_POPUP = "openPopup"
 }
 
 export type EventMessage<T extends EventType> = {
@@ -20,9 +22,7 @@ export type EventMessage<T extends EventType> = {
     } : T extends EventType.REDUCE_TASK_LIST ? {
         action: "set" | "get" | "insert" | "remove"
         payload: {
-            // taskList and task are mutually exclusive
             taskList?: Task[],
-            task?: Task
         }
-    } : never
+    } : null
 }

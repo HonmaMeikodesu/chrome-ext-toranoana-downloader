@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { Task } from "../../types";
-import { ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined, BugOutlined } from "@ant-design/icons";
+import { ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined, BugOutlined, CloseOutlined } from "@ant-design/icons";
 import { Button, Collapse, CollapseProps } from "antd";
 import { EventMessage, EventType } from "../../utils/evt";
 import cx from "classnames";
@@ -8,11 +8,12 @@ import cx from "classnames";
 import "./index.scss";
 
 type ComponentProps = {
-    tasks: Task[]
+    tasks: Task[];
+    onDeleteTask: (task: Task) => void;
 }
 
 export default function TaskList(props: ComponentProps) {
-    const { tasks } = props;
+    const { tasks, onDeleteTask } = props;
 
     const retry = useCallback((params: { bookUrl: string, bookTitle: string, errorPageList?: number[] }) => {
         const { bookTitle, bookUrl, errorPageList } = params;
@@ -33,6 +34,7 @@ export default function TaskList(props: ComponentProps) {
         const ret: CollapseProps["items"] = (tasks || []).map((task) => {
             const { status, bookTitle, bookUrl, errorPageList } = task;
             const isExceptional = status === "error" || status === "fatal";
+            const isResolved = status !== "pending" && status !== "downloading";
             return {
                 label: (
                     <div className={taskHeaderCls}>
@@ -47,6 +49,7 @@ export default function TaskList(props: ComponentProps) {
                                 status === "fatal" ? <BugOutlined /> : ""
                         }</div>
                         {isExceptional && <Button className={`${taskHeaderCls}-retry`} type="link" onClick={() => retry({ bookUrl, bookTitle, errorPageList: status === "error" ? errorPageList : undefined })}>重试</Button>}
+                        {isResolved && <CloseOutlined className={`${taskHeaderCls}-remove`} onClick={() => onDeleteTask?.(task) }  />}
                     </div>
                 ),
                 showArrow: isExceptional,

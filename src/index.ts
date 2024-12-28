@@ -27,4 +27,9 @@ function requestParseBook(bookUrl: string, initBookTitle: string) {
         }
     }
     chrome.runtime.sendMessage(msg);
+    const openPopup: EventMessage<EventType.OPEN_POPUP> = {
+        type: EventType.OPEN_POPUP,
+        payload: null 
+    }
+    chrome.runtime.sendMessage(openPopup)
 }

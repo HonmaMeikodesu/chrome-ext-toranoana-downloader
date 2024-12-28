@@ -9,10 +9,9 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 chrome.runtime.onMessage.addListener((message: EventMessage<any>, sender, sendResponse) => {
 
-
     if (EventMessageTypeGuard<EventType.REDUCE_TASK_LIST>(message, EventType.REDUCE_TASK_LIST)) {
         const { action, payload } = message.payload;
-        const { task, taskList } = payload;
+        const { taskList } = payload;
 
         switch (action) {
             case "get":
@@ -24,10 +23,10 @@ chrome.runtime.onMessage.addListener((message: EventMessage<any>, sender, sendRe
                 taskList && setTaskList(taskList);
                 break;
             case "insert":
-                task && insertToTaskList(task);
+                taskList && insertToTaskList(taskList);
                 break;
             case "remove":
-                task && removeFromTaskList(task);
+                taskList && removeFromTaskList(taskList);
                 break;
         }
     }
@@ -56,6 +55,10 @@ chrome.runtime.onMessage.addListener((message: EventMessage<any>, sender, sendRe
                 };
                 localEventBus.emit(LocalEventType.DOWNLOAD_FATAL, downloadFatalMsg);
             }
+        }
+
+        if (EventMessageTypeGuard<EventType.OPEN_POPUP>(message, EventType.OPEN_POPUP)) {
+            chrome.action.openPopup();
         }
     })()
 })
