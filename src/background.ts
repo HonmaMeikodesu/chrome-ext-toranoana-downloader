@@ -1,3 +1,4 @@
+import { getIdFromBookUrl } from "./utils/common";
 import { EventMessage, EventMessageTypeGuard, EventType } from "./utils/evt";
 import { localEventBus, LocalEventMessage, LocalEventType } from "./utils/localEventBus";
 import { processBook } from "./utils/process";
@@ -35,12 +36,13 @@ chrome.runtime.onMessage.addListener((message: EventMessage<any>, sender, sendRe
         if (EventMessageTypeGuard<EventType.PARSE_BOOK>(message, EventType.PARSE_BOOK)) {
             const { bookTitle, bookUrl } = message.payload;
             const taskList = await getTaskList();
-            const book = taskList.find(item => item.bookUrl === bookUrl);
+            const id = getIdFromBookUrl(bookUrl);
+            const book = taskList.find(item => item.id === id);
             if (book) {
                 book.status = "pending";
                 delete book.errorPageList;
             } else {
-                taskList.push({ bookUrl, bookTitle, status: "pending" });
+                taskList.push({ id, bookUrl, bookTitle, status: "pending" });
             }
             setTaskList(taskList);
             try {
@@ -65,53 +67,57 @@ chrome.runtime.onMessage.addListener((message: EventMessage<any>, sender, sendRe
 
 localEventBus.on(LocalEventType.START_DOWNLOAD, async (message: LocalEventMessage<LocalEventType.START_DOWNLOAD>) => {
     const { bookUrl, bookTitle } =  message.payload
+    const id = getIdFromBookUrl(bookUrl);
     const taskList = await getTaskList();
-    const book = taskList.find(item => item.bookUrl === bookUrl);
+    const book = taskList.find(item => item.id === id);
     if (book) {
         book.status = "downloading";
         book.bookTitle = bookTitle;
     } else {
-        taskList.push({ bookUrl, bookTitle, status: "downloading" });
+        taskList.push({ id, bookUrl, bookTitle, status: "downloading" });
     }
     setTaskList(taskList);
 })
 
 localEventBus.on(LocalEventType.DOWNLOAD_COMPLETE, async (message: LocalEventMessage<LocalEventType.DOWNLOAD_COMPLETE>) => {
     const { bookUrl, bookTitle } = message.payload;
+    const id = getIdFromBookUrl(bookUrl);
     const taskList = await getTaskList();
-    const book = taskList.find(item => item.bookUrl === bookUrl);
+    const book = taskList.find(item => item.id === id);
     if (book) {
         book.status = "done"
         book.bookTitle = bookTitle;
     } else {
-        taskList.push({ bookUrl, bookTitle, status: "done" })
+        taskList.push({ id, bookUrl, bookTitle, status: "done" })
     }
     setTaskList(taskList);
 })
 
 localEventBus.on(LocalEventType.DOWNLOAD_ERROR, async (message: LocalEventMessage<LocalEventType.DOWNLOAD_ERROR>) => {
     const { bookTitle, bookUrl, errorPageList } = message.payload;
+    const id = getIdFromBookUrl(bookUrl);
     const taskList = await getTaskList();
-    const book = taskList.find(item => item.bookUrl === bookUrl);
+    const book = taskList.find(item => item.id === id);
     if (book) {
         book.status = "error";
         book.bookTitle = bookTitle;
         book.errorPageList = errorPageList;
     } else {
-        taskList.push({ bookUrl, bookTitle, status: "error", errorPageList })
+        taskList.push({ id, bookUrl, bookTitle, status: "error", errorPageList })
     }
     setTaskList(taskList);
 })
 
 localEventBus.on(LocalEventType.DOWNLOAD_FATAL, async (message: LocalEventMessage<LocalEventType.DOWNLOAD_FATAL>) => {
     const { bookTitle, bookUrl } = message.payload;
+    const id = getIdFromBookUrl(bookUrl);
     const taskList = await getTaskList();
-    const book = taskList.find(item => item.bookUrl === bookUrl);
+    const book = taskList.find(item => item.id === id);
     if (book) {
         book.status = "fatal";
         book.bookTitle = bookTitle;
     } else {
-        taskList.push({ bookUrl, bookTitle, status: "fatal" })
+        taskList.push({ id, bookUrl, bookTitle, status: "fatal" })
     }
     setTaskList(taskList);
 })

@@ -12,7 +12,7 @@ export async function initTaskDB() {
     const exports = await import("idb");
     await exports.openDB(DB_NAME, DB_VERSION, {
         upgrade(db) {
-            db.createObjectStore(TASK_STORE_NAME, { keyPath: "bookUrl" });
+            db.createObjectStore(TASK_STORE_NAME, { keyPath: "id" });
         }
     });
 }
@@ -56,7 +56,7 @@ export async function removeFromTaskList(tasks: Task[]) {
     const db = await getDbHandle();
     const store = db.transaction(TASK_STORE_NAME, "readwrite").store;
     for (const task of tasks) {
-        await store.delete(task.bookUrl);
+        await store.delete(task.id);
     }
     chrome.runtime.sendMessage({ type: EventType.SYNC_TASK_LIST });
 }

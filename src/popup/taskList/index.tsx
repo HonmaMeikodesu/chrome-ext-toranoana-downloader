@@ -6,6 +6,7 @@ import { EventMessage, EventType } from "../../utils/evt";
 import cx from "classnames";
 
 import "./index.scss";
+import { cloneDeep } from "lodash";
 
 type ComponentProps = {
     tasks: Task[];
@@ -61,7 +62,7 @@ export default function TaskList(props: ComponentProps) {
                                 <>
                                     <span>以下页码下载失败: </span>
                                     {
-                                        errorPageList.map((pageNum, idx) => (
+                                        cloneDeep(errorPageList).sort().map((pageNum, idx) => (
                                             <>
                                                 <span className={`${taskBodyCls}-error-page`}>{pageNum}</span>
                                                 {idx < errorPageList.length - 1 && <span>, </span>}

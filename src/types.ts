@@ -14,4 +14,4 @@ export type ClassifedData = {
     p5: string
 }
 
-export type Task = { bookUrl: string; bookTitle: string; errorPageList?: number[], status: "pending" | "downloading" | "done" | "error" | "fatal" };
+export type Task = { id: string; bookUrl: string; bookTitle: string; errorPageList?: number[], status: "pending" | "downloading" | "done" | "error" | "fatal" };

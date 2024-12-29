@@ -18,6 +18,7 @@ const mainfestJson = {
     ],
     host_permissions: [
         "*://*.toraebook.com/*",
+        "https://*.amazonaws.com/viewer.toraebook.com/*"
     ],
     content_scripts: 
     [

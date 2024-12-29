@@ -26,3 +26,8 @@ export function usePromisifyCb(func: (params: any, cb: any, errCb?: any) => void
         }
     })
 }
+
+export function getIdFromBookUrl(bookUrl: string): string {
+    const url = new URL(bookUrl);
+    return url.searchParams.get("title_id") as string;
+}

@@ -9,6 +9,11 @@
     .ant-collapse-header-text {
         max-width: calc(100% - 24px) !important;
     }
+
+    .ant-collapse .ant-collapse-item-disabled>.ant-collapse-header {
+        cursor: auto !important;
+    }
+
     .task-item-header {
         display: flex;
         align-items: center;
@@ -46,6 +51,7 @@
 
         &-remove {
             cursor: pointer;
+            margin-left: 8px;
         }
     }
     
