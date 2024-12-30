@@ -122,13 +122,9 @@ export async function processBook(bookUrl: string, options?: { pageNums?: number
     localEventBus.emit(LocalEventType.START_DOWNLOAD, startDownloadMsg);
 
     let now = moment();
-    let remnantPages = targetPages;
     for(let i = 0; i < targetPages.length; i+=MULTI_WORKER_THREAD) {
         const targetBatch = targetPages.slice(i, i + MULTI_WORKER_THREAD);
-        await Promise.all(targetBatch.map(async (pageNum) => {
-            await worker(headerInfo.pgs.pg.find(item => item.n === pageNum)!);
-            remnantPages = remnantPages.filter(item => item !== pageNum);
-        }));
+        await Promise.all(targetBatch.map((pageNum) => worker(headerInfo.pgs.pg.find(item => item.n === pageNum)!)));
         const elapsed = moment().diff(now, "minutes");
         if (elapsed > EXPIRE_MINS) {
             const { headerInfo: nextHeaderInfo } = await requestBookAccess(bookUrl);
