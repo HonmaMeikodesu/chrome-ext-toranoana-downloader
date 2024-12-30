@@ -10,7 +10,7 @@ const mainfestJson = {
     description: "downloader for toranoana online hondana",
     version: "1.0",
     action: {
-        default_icon: "hello_extensions.png",
+        default_icon: "icons/icon128.png",
         default_popup: "dist/index.html"
     },
     permissions: [
@@ -20,18 +20,24 @@ const mainfestJson = {
         "*://*.toraebook.com/*",
         "https://*.amazonaws.com/viewer.toraebook.com/*"
     ],
-    content_scripts: 
-    [
-        {
-            matches: [
-                "*://books.toraebook.com/toraebook/*",
-                "http://localhost:8080/*"
-            ],
-            js: [
-                "dist/content.js"
-            ]
-        }
-    ],
+    content_scripts:
+        [
+            {
+                matches: [
+                    "*://books.toraebook.com/toraebook/*",
+                    "http://localhost:8080/*"
+                ],
+                js: [
+                    "dist/content.js"
+                ]
+            }
+        ],
+    icons: {
+        "16": "icons/icon16.png",
+        "32": "icons/icon32.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
     background: {
         "service_worker": "dist/background.js"
     },

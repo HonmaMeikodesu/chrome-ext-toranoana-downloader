@@ -2,10 +2,17 @@
 const { mkdir, readFile, rm, cp } = require("fs/promises");
 const { values } = require("lodash");
 const { resolve } = require("path");
+const bz = require("bestzip");
+
+const outputDirName = resolve(__dirname, "../output");
+const artifactName = resolve(__dirname, "../artifact.zip");
+
+const clean = async () => {
+    await rm(outputDirName, { recursive: true, force: true });
+    await rm(artifactName, { force: true });
+}
 
 const pack = async () => {
-    const outputDirName = resolve(__dirname, "../output");
-    await rm(outputDirName, { recursive: true, force: true });
     await mkdir(outputDirName);
     const rootDir = resolve(__dirname, "../");
     const manifestPath = "manifest.json";
@@ -16,9 +23,9 @@ const pack = async () => {
 
     const { action, content_scripts, background, web_accessible_resources } = manifestJson;
 
-    const { default_popup, default_icon } = action || {};
+    const { default_popup } = action || {};
 
-    targets.push(...[default_icon, default_popup].filter(Boolean));
+    targets.push(default_popup);
 
     content_scripts?.forEach(script => {
         script?.js?.forEach(js => {
@@ -37,10 +44,21 @@ const pack = async () => {
     backgroundScripts?.forEach(script => {
         targets.push(script);
     })
-    
+
+    targets.push("icons");
+
     await Promise.all(targets.map(async item => {
         return await cp(resolve(rootDir, item), resolve(outputDirName, item), { recursive: true });
     }));
+    
+    await bz({
+        source: "./*",
+        destination: artifactName,
+        cwd: outputDirName
+    });
 }
 
-pack()
+clean().then(() => {
+    return pack();
+});
+

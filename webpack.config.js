@@ -59,6 +59,7 @@ const webConfig = {
     })],
 };
 
+/** @type {import("webpack").Configuration}  */
 const serviceWorkerConfig = {
     target: "webworker",
     entry: {
@@ -67,7 +68,11 @@ const serviceWorkerConfig = {
     output: { path: path.resolve(__dirname, "dist") },
     resolve: {
         extensions: [".ts", ".js", ".json"],
-        fallback: { stream: require.resolve("stream-browserify") }
+        fallback: {
+            stream: require.resolve("stream-browserify"),
+            "perf_hooks": require.resolve("./WEBPACK_FALLBACK/perf_hooks.cjs"),
+            "canvas": require.resolve("./WEBPACK_FALLBACK/canvas-shim.cjs")
+        }
     },
     module: {
         rules: [

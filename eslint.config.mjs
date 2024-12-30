@@ -16,7 +16,8 @@ export default [
       "scripts",
       "webpack.config.js",
       "output",
-      "server.js"
+      "server.js",
+      "WEBPACK_FALLBACK"
     ]
   },
   {files: ["**/*.js"], languageOptions: {sourceType: "script"}},
