@@ -2,7 +2,7 @@ import { getIdFromBookUrl } from "./utils/common";
 import { EventMessage, EventMessageTypeGuard, EventType } from "./utils/evt";
 import { localEventBus, LocalEventMessage, LocalEventType } from "./utils/localEventBus";
 import { processBook } from "./utils/process";
-import { getTaskList, setTaskList, insertToTaskList, removeFromTaskList, initTaskDB } from "./utils/storageManage";
+import { getTaskList, setTaskList, insertToTaskList, removeFromTaskList, initTaskDB, getLocalStorageItem, setLocalStorageItem } from "./utils/storageManage";
 
 chrome.runtime.onInstalled.addListener(async () => {
     await initTaskDB();
@@ -30,6 +30,20 @@ chrome.runtime.onMessage.addListener((message: EventMessage<any>, sender, sendRe
                 taskList && removeFromTaskList(taskList);
                 break;
         }
+    }
+
+    if (EventMessageTypeGuard<EventType.READ_APP_CONFIG>(message, EventType.READ_APP_CONFIG)) {
+        getLocalStorageItem("appConfig").then((appConfig) => {
+            sendResponse(appConfig);
+        });
+        return true;
+    }
+
+    if (EventMessageTypeGuard<EventType.GET_DISCLAIMER_AGREED>(message, EventType.GET_DISCLAIMER_AGREED)) {
+        getLocalStorageItem("disclaimerAgreed").then((disclaimerAgreed) => {
+            sendResponse(disclaimerAgreed);
+        });
+        return true;
     }
 
     (async () => {
@@ -61,6 +75,15 @@ chrome.runtime.onMessage.addListener((message: EventMessage<any>, sender, sendRe
 
         if (EventMessageTypeGuard<EventType.OPEN_POPUP>(message, EventType.OPEN_POPUP)) {
             chrome.action.openPopup();
+        }
+
+        if (EventMessageTypeGuard<EventType.SET_APP_CONFIG>(message, EventType.SET_APP_CONFIG)) {
+            const appConfig = message.payload;
+            await setLocalStorageItem("appConfig", appConfig);
+        }
+
+        if (EventMessageTypeGuard<EventType.DISCLAIMER_AGREED>(message, EventType.DISCLAIMER_AGREED)) {
+            await setLocalStorageItem("disclaimerAgreed", true);
         }
     })()
 })

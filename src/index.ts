@@ -1,4 +1,5 @@
 import { EventMessage, EventType } from "./utils/evt";
+import { DISCLAIMER } from "./disclaimer";
 
 const bookList =  document.querySelectorAll<HTMLAnchorElement>("#book_container .link-list > li > a");
 
@@ -15,8 +16,30 @@ const bookList =  document.querySelectorAll<HTMLAnchorElement>("#book_container 
 
     const bookTitle = ele.querySelector("em")?.textContent?.trim()?.replace(/\n\s*/g, "");
 
-    download.onclick =  () => requestParseBook(bookUrl, bookTitle ?? "");
+    download.onclick = () => disclaimerGuard().then(() => requestParseBook(bookUrl, bookTitle ?? ""));
 })
+
+async function disclaimerGuard() {
+    const msg: EventMessage<EventType.GET_DISCLAIMER_AGREED> = {
+        type: EventType.GET_DISCLAIMER_AGREED,
+        payload: null
+    };
+
+    const isDisclaimerAgreed: boolean = await chrome.runtime.sendMessage(msg);
+
+    if (!isDisclaimerAgreed) {
+        const res = confirm(DISCLAIMER);
+        if (res) {
+            const msg: EventMessage<EventType.DISCLAIMER_AGREED> = {
+                type: EventType.DISCLAIMER_AGREED,
+                payload: null
+            }
+            chrome.runtime.sendMessage(msg);
+            return;
+        }
+        throw new Error();
+    }
+}
 
 function requestParseBook(bookUrl: string, initBookTitle: string) {
     const msg: EventMessage<EventType.PARSE_BOOK> = {

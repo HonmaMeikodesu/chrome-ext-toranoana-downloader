@@ -15,3 +15,7 @@ export type ClassifedData = {
 }
 
 export type Task = { id: string; bookUrl: string; bookTitle: string; errorPageList?: number[], status: "pending" | "downloading" | "done" | "error" | "fatal" };
+
+export type AppConfig = {
+    multiThreadFetch?: number;
+}

@@ -1,5 +1,5 @@
 // don't know how to implement reader and writer locks here, so let's just ask IndexedDB to do this favor
-import { Task } from "../types.js";
+import { AppConfig, Task } from "../types.js";
 // @ts-expect-error ignore this ts error, this module INDEED has a CJS entry, checkout out its main field in package.json
 import { openDB, IDBPDatabase } from "idb";
 import { EventType } from "./evt.js";
@@ -59,4 +59,46 @@ export async function removeFromTaskList(tasks: Task[]) {
         await store.delete(task.id);
     }
     chrome.runtime.sendMessage({ type: EventType.SYNC_TASK_LIST });
+}
+
+
+/** -------------------------Local Storage------------------------------- */
+
+type LocalStorageItems = {
+    appConfig: string;
+    disclaimerAgreed: boolean;
+};
+
+export async function getLocalStorageItem<T extends keyof LocalStorageItems>(item: T): Promise<T extends "appConfig" ? AppConfig : boolean> {
+    switch (item) {
+        case "appConfig":
+            try {
+                if (item === "appConfig") { return {} as any }
+                return JSON.parse((await chrome.storage.local.get<LocalStorageItems>(["appConfig"])).appConfig || "{}");
+            } catch (e) {
+                console.error(e);
+                return {} as any
+            }
+        case "disclaimerAgreed":
+            return (await chrome.storage.local.get<LocalStorageItems>(["disclaimerAgreed"])).disclaimerAgreed as any
+        default:
+            throw new Error("Unknown item");
+    }
+}
+
+export async function setLocalStorageItem<T extends keyof LocalStorageItems>(key: T, value: T extends "appConfig" ? AppConfig : boolean) {
+    switch (key) {
+        case "appConfig":
+            {
+                const appConfig = value as AppConfig;
+                return await chrome.storage.local.set<LocalStorageItems>({ appConfig: JSON.stringify(appConfig) })
+            }
+        case "disclaimerAgreed":
+            {
+                const disclaimerAgreed = value as boolean;
+                return await chrome.storage.local.set<LocalStorageItems>({ disclaimerAgreed })
+            }
+        default:
+            throw new Error("Unknown item");
+    }
 }

@@ -14,7 +14,7 @@ const mainfestJson = {
         default_popup: "dist/index.html"
     },
     permissions: [
-        "downloads"
+        "downloads", "storage"
     ],
     host_permissions: [
         "*://*.toraebook.com/*",

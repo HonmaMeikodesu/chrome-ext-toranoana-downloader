@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import TaskList from "./taskList";
-import { EventMessage, EventMessageTypeGuard, EventType } from "../utils/evt";
-import { Task } from "../types";
+import { EventMessage, EventMessageResponse, EventMessageTypeGuard, EventType } from "../utils/evt";
+import { AppConfig, Task } from "../types";
 import "./root.css";
 import { Button, Divider } from "antd";
+import Config from "./config";
 export default function Root() {
     const [ tasks, setTasks  ] = useState<Task[]>([]);
+    const [appConfig, setAppConfig] = useState<AppConfig>({ multiThreadFetch: undefined });
     const refreshTaskList = useCallback(() => {
         const getTaskListPayload: EventMessage<EventType.REDUCE_TASK_LIST> = {
             type: EventType.REDUCE_TASK_LIST,
@@ -18,6 +20,16 @@ export default function Root() {
             setTasks(response);
         })
     }, [ setTasks ]);
+
+    const refreshAppConfig = useCallback(() => {
+        const getAppConfigPayload: EventMessage<EventType.READ_APP_CONFIG> = {
+            type: EventType.READ_APP_CONFIG,
+            payload: null
+        };
+        chrome.runtime.sendMessage(getAppConfigPayload, (response: EventMessageResponse<EventType.READ_APP_CONFIG>) => {
+            setAppConfig(response);
+        })
+    }, []);
 
     const removeTaskHistory = useCallback((tasksToRemove: Task[]) => {
         const removeTasksPayload: EventMessage<EventType.REDUCE_TASK_LIST> = {
@@ -32,6 +44,14 @@ export default function Root() {
         chrome.runtime.sendMessage(removeTasksPayload);
     }, []);
 
+    const persistAppConfig = useCallback((appConfig: AppConfig) => {
+        const setAppConfigPayload: EventMessage<EventType.SET_APP_CONFIG> = {
+            type: EventType.SET_APP_CONFIG,
+            payload: appConfig
+        };
+        chrome.runtime.sendMessage(setAppConfigPayload);
+    }, [])
+
     useEffect(() => {
         chrome.runtime.onMessage.addListener((message: EventMessage<any>) => {
             if (EventMessageTypeGuard<EventType.SYNC_TASK_LIST>(message, EventType.SYNC_TASK_LIST)) {
@@ -39,12 +59,17 @@ export default function Root() {
             }
         });
         refreshTaskList();
+        refreshAppConfig();
     }, []);
+
     return (
         <div className="popup-container">
             <div className="popup-header">
                 <span>任务列表</span>
-                <span className="popup-header-clear-history"><Button type="text" onClick={() => removeTaskHistory(tasks)}>清空历史</Button></span>
+                <div className="popup-header-ext">
+                    <span className="popup-header-clear-setting"><Config appConfig={appConfig} onAppConfigChange={persistAppConfig} /></span>
+                    <span className="popup-header-clear-history"><Button type="text" onClick={() => removeTaskHistory(tasks)}>清空历史</Button></span>
+                </div>
             </div>
             <Divider style={{ margin: "6px 0"}} />
             <div className="popup-body">

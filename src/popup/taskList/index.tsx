@@ -65,7 +65,7 @@ export default function TaskList(props: ComponentProps) {
                                         cloneDeep(errorPageList).sort().map((pageNum, idx) => (
                                             <>
                                                 <span className={`${taskBodyCls}-error-page`}>{pageNum}</span>
-                                                {idx < errorPageList.length - 1 && <span>, </span>}
+                                                {idx < errorPageList.length - 1 && <span>,&nbsp;</span>}
                                             </>
 
                                         ))
