@@ -14,7 +14,7 @@ const mainfestJson = {
         default_popup: "dist/index.html"
     },
     permissions: [
-        "downloads", "storage"
+        "downloads", "storage", "tabs"
     ],
     host_permissions: [
         "*://*.toraebook.com/*",
@@ -24,8 +24,8 @@ const mainfestJson = {
         [
             {
                 matches: [
-                    "*://books.toraebook.com/toraebook/*",
-                    "http://localhost:8080/*"
+                    "*://books.toraebook.com/toraebook/*"
+                    // "http://localhost:8080/*"
                 ],
                 js: [
                     "dist/content.js"
@@ -46,7 +46,10 @@ const mainfestJson = {
             resources: [
                 "dist/popup.js"
             ],
-            matches: ["*://*.toraebook.com/*", "http://localhost:8080/*"]
+            matches: [
+                "*://*.toraebook.com/*"
+                // "http://localhost:8080/*"
+            ]
         }
     ]
 }

@@ -73,7 +73,6 @@ export async function getLocalStorageItem<T extends keyof LocalStorageItems>(ite
     switch (item) {
         case "appConfig":
             try {
-                if (item === "appConfig") { return {} as any }
                 return JSON.parse((await chrome.storage.local.get<LocalStorageItems>(["appConfig"])).appConfig || "{}");
             } catch (e) {
                 console.error(e);

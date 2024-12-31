@@ -5,6 +5,7 @@ import { AppConfig, Task } from "../types";
 import "./root.css";
 import { Button, Divider } from "antd";
 import Config from "./config";
+import { useI18n } from "./hooks/useI18n";
 export default function Root() {
     const [ tasks, setTasks  ] = useState<Task[]>([]);
     const [appConfig, setAppConfig] = useState<AppConfig>({ multiThreadFetch: undefined });
@@ -62,13 +63,15 @@ export default function Root() {
         refreshAppConfig();
     }, []);
 
+    const [title, resetHistory] = useI18n(["UI.popup.taskList.title", "UI.popup.taskList.resetHistory"]);
+
     return (
         <div className="popup-container">
             <div className="popup-header">
-                <span>任务列表</span>
+                <span>{title}</span>
                 <div className="popup-header-ext">
                     <span className="popup-header-clear-setting"><Config appConfig={appConfig} onAppConfigChange={persistAppConfig} /></span>
-                    <span className="popup-header-clear-history"><Button type="text" onClick={() => removeTaskHistory(tasks)}>清空历史</Button></span>
+                    <span className="popup-header-clear-history"><Button type="text" onClick={() => removeTaskHistory(tasks)}>{resetHistory}</Button></span>
                 </div>
             </div>
             <Divider style={{ margin: "6px 0"}} />

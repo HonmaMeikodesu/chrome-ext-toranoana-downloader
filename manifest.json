@@ -9,7 +9,8 @@
   },
   "permissions": [
     "downloads",
-    "storage"
+    "storage",
+    "tabs"
   ],
   "host_permissions": [
     "*://*.toraebook.com/*",

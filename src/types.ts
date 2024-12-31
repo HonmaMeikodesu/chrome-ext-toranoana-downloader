@@ -18,4 +18,5 @@ export type Task = { id: string; bookUrl: string; bookTitle: string; errorPageLi
 
 export type AppConfig = {
     multiThreadFetch?: number;
+    locale?: "en" | "zh-CN";
 }

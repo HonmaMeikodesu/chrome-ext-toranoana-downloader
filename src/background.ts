@@ -1,5 +1,7 @@
+import { AppConfig } from "./types";
 import { getIdFromBookUrl } from "./utils/common";
 import { EventMessage, EventMessageTypeGuard, EventType } from "./utils/evt";
+import i18n from "./utils/i18n";
 import { localEventBus, LocalEventMessage, LocalEventType } from "./utils/localEventBus";
 import { processBook } from "./utils/process";
 import { getTaskList, setTaskList, insertToTaskList, removeFromTaskList, initTaskDB, getLocalStorageItem, setLocalStorageItem } from "./utils/storageManage";
@@ -46,6 +48,10 @@ chrome.runtime.onMessage.addListener((message: EventMessage<any>, sender, sendRe
         return true;
     }
 
+    if (EventMessageTypeGuard<EventType.I18N>(message, EventType.I18N)) {
+        sendResponse(i18n.t(message.payload));
+    }
+
     (async () => {
         if (EventMessageTypeGuard<EventType.PARSE_BOOK>(message, EventType.PARSE_BOOK)) {
             const { bookTitle, bookUrl } = message.payload;
@@ -80,6 +86,7 @@ chrome.runtime.onMessage.addListener((message: EventMessage<any>, sender, sendRe
         if (EventMessageTypeGuard<EventType.SET_APP_CONFIG>(message, EventType.SET_APP_CONFIG)) {
             const appConfig = message.payload;
             await setLocalStorageItem("appConfig", appConfig);
+            onSetAppConfig(appConfig);
         }
 
         if (EventMessageTypeGuard<EventType.DISCLAIMER_AGREED>(message, EventType.DISCLAIMER_AGREED)) {
@@ -144,3 +151,9 @@ localEventBus.on(LocalEventType.DOWNLOAD_FATAL, async (message: LocalEventMessag
     }
     setTaskList(taskList);
 })
+
+function onSetAppConfig(appConfig: AppConfig) {
+    const { locale} = appConfig || {};
+
+    locale && (i18n.locale = locale);
+}

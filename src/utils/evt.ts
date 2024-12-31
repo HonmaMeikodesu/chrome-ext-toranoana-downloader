@@ -16,6 +16,10 @@ export const enum EventType {
     SYNC_TASK_LIST = "syncTaskList",
     READ_APP_CONFIG = "readAppConfig",
     SET_APP_CONFIG = "setAppConfig",
+
+    // i18n
+    I18N = "i18n",
+    SYNC_I18N = "syncI18n"
 }
 
 export type EventMessage<T extends EventType> = {
@@ -29,7 +33,9 @@ export type EventMessage<T extends EventType> = {
         payload: {
             taskList?: Task[],
         }
-    } : T extends EventType.SET_APP_CONFIG ? AppConfig : null
+    } : T extends EventType.SET_APP_CONFIG ? AppConfig
+    : T extends EventType.I18N ? string
+    : null
 };
 
-export type EventMessageResponse<T extends EventType> = T extends EventType.READ_APP_CONFIG ? AppConfig : T extends EventType.GET_DISCLAIMER_AGREED ? boolean : null;
+export type EventMessageResponse<T extends EventType> = T extends EventType.READ_APP_CONFIG ? AppConfig : T extends EventType.GET_DISCLAIMER_AGREED ? boolean : T extends EventType.I18N ? string : null;

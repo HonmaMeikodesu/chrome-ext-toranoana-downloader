@@ -7,6 +7,7 @@ import cx from "classnames";
 
 import "./index.scss";
 import { cloneDeep } from "lodash";
+import { useI18n } from "../hooks/useI18n";
 
 type ComponentProps = {
     tasks: Task[];
@@ -15,6 +16,8 @@ type ComponentProps = {
 
 export default function TaskList(props: ComponentProps) {
     const { tasks, onDeleteTask } = props;
+
+    const [retryTask, taskError, taskFatal, noTask] = useI18n(["UI.popup.taskList.retryTask", "UI.popup.taskList.taskErrorPrompt", "UI.popup.taskList.taskFatalPrompt", "UI.popup.taskList.noTaskPrompt"])
 
     const retry = useCallback((params: { bookUrl: string, bookTitle: string, errorPageList?: number[] }) => {
         const { bookTitle, bookUrl, errorPageList } = params;
@@ -29,7 +32,7 @@ export default function TaskList(props: ComponentProps) {
         chrome.runtime.sendMessage(retryMsg);
     }, [ tasks ]);
 
-    const buildCollapseItems = useCallback(() => {
+    const buildCollapseItems = () => {
         const taskHeaderCls = "task-item-header";
         const taskBodyCls = "task-item-body";
         const ret: CollapseProps["items"] = (tasks || []).map((task) => {
@@ -39,28 +42,28 @@ export default function TaskList(props: ComponentProps) {
             return {
                 label: (
                     <div className={taskHeaderCls}>
-                        <div className={ `${taskHeaderCls}-title` } title={bookTitle}>
+                        <div className={`${taskHeaderCls}-title`} title={bookTitle}>
                             {bookTitle}
                         </div>
                         <div className={cx(`${taskHeaderCls}-status-${status}`, `${taskHeaderCls}-status`)}>{
-                                status === "pending" ? <ClockCircleOutlined  />:
-                                status === "downloading" ? <LoadingOutlined spin={true} />:
+                            status === "pending" ? <ClockCircleOutlined /> :
+                                status === "downloading" ? <LoadingOutlined spin={true} /> :
                                     status === "done" ? <CheckCircleOutlined /> :
-                                status === "error" ? <CloseCircleOutlined /> :
-                                status === "fatal" ? <BugOutlined /> : ""
+                                        status === "error" ? <CloseCircleOutlined /> :
+                                            status === "fatal" ? <BugOutlined /> : ""
                         }</div>
-                        {isExceptional && <Button className={`${taskHeaderCls}-retry`} type="link" onClick={() => retry({ bookUrl, bookTitle, errorPageList: status === "error" ? errorPageList : undefined })}>重试</Button>}
-                        {isResolved && <CloseOutlined className={`${taskHeaderCls}-remove`} onClick={() => onDeleteTask?.(task) }  />}
+                        {isExceptional && <Button className={`${taskHeaderCls}-retry`} type="link" onClick={() => retry({ bookUrl, bookTitle, errorPageList: status === "error" ? errorPageList : undefined })}>{retryTask}</Button>}
+                        {isResolved && <CloseOutlined className={`${taskHeaderCls}-remove`} onClick={() => onDeleteTask?.(task)} />}
                     </div>
                 ),
                 showArrow: isExceptional,
-                collapsible: !isExceptional ? "disabled" : "header", 
+                collapsible: !isExceptional ? "disabled" : "header",
                 children: (
                     <div className={taskBodyCls}>
                         {
                             status === "error" && errorPageList?.length && (
                                 <>
-                                    <span>以下页码下载失败: </span>
+                                    <span>{taskError}</span>
                                     {
                                         cloneDeep(errorPageList).sort().map((pageNum, idx) => (
                                             <>
@@ -75,14 +78,14 @@ export default function TaskList(props: ComponentProps) {
                             )
                         }
                         {
-                            status === "fatal" && <div className={`${taskBodyCls}-fatal`}>系统异常，请重试</div>
+                            status === "fatal" && <div className={`${taskBodyCls}-fatal`}>{taskFatal}</div>
                         }
                     </div>
                 )
             }
         });
         return ret;
-    }, [ tasks ]);
+    };
 
     return (
         <div className="task-list-container">
@@ -91,7 +94,7 @@ export default function TaskList(props: ComponentProps) {
                     <Collapse ghost={true} items={buildCollapseItems()} />
                 ) : (
                     <div className="task-list-empty">
-                        暂无任务
+                        {noTask}
                     </div>
                 )
             }

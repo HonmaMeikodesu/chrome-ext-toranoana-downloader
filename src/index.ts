@@ -1,14 +1,15 @@
-import { EventMessage, EventType } from "./utils/evt";
-import { DISCLAIMER } from "./disclaimer";
+import { EventMessage, EventMessageResponse, EventType } from "./utils/evt";
+
+const DOWNLOAD_BTN_CLS = "toranana-content-script-download-btn";
 
 const bookList =  document.querySelectorAll<HTMLAnchorElement>("#book_container .link-list > li > a");
 
-[ ...bookList ].forEach((ele) => {
+[...bookList].forEach((ele) => {
     const download = document.createElement("button");
 
-    download.setAttribute("style",  "background-color: #4CAF50; color: white; padding: 0 8px; text-align: center; text-decoration: none; display: block; font-size: 16px; cursor: pointer");
+    download.setAttribute("style", "background-color: #4CAF50; color: white; padding: 0 8px; text-align: center; text-decoration: none; display: block; font-size: 16px; cursor: pointer");
 
-    download.innerText = "下载";
+    download.classList.add(DOWNLOAD_BTN_CLS);
 
     ele.insertAdjacentElement("afterend", download);
 
@@ -17,6 +18,8 @@ const bookList =  document.querySelectorAll<HTMLAnchorElement>("#book_container 
     const bookTitle = ele.querySelector("em")?.textContent?.trim()?.replace(/\n\s*/g, "");
 
     download.onclick = () => disclaimerGuard().then(() => requestParseBook(bookUrl, bookTitle ?? ""));
+
+    return () => download.remove();
 })
 
 async function disclaimerGuard() {
@@ -27,8 +30,10 @@ async function disclaimerGuard() {
 
     const isDisclaimerAgreed: boolean = await chrome.runtime.sendMessage(msg);
 
+    const disclaimerTxt = await getI18nText("UI.content.disclaimer");
+
     if (!isDisclaimerAgreed) {
-        const res = confirm(DISCLAIMER);
+        const res = confirm(disclaimerTxt);
         if (res) {
             const msg: EventMessage<EventType.DISCLAIMER_AGREED> = {
                 type: EventType.DISCLAIMER_AGREED,
@@ -56,3 +61,32 @@ function requestParseBook(bookUrl: string, initBookTitle: string) {
     }
     chrome.runtime.sendMessage(openPopup)
 }
+
+async function getI18nText(key: string) {
+    const getI18nMsg: EventMessage<EventType.I18N> = {
+        type: EventType.I18N,
+        payload: key
+    };
+
+    const res: EventMessageResponse<EventType.I18N> = await chrome.runtime.sendMessage(getI18nMsg);
+    
+    return res;
+}
+
+async function modifyI18nContent() {
+    const downloadBtns = document.querySelectorAll<HTMLButtonElement>(`.${DOWNLOAD_BTN_CLS}`);
+
+    const downloadTxt = await getI18nText("UI.content.download")
+
+    downloadBtns.forEach((btn) => {
+        btn.textContent = downloadTxt;
+    })
+}
+
+chrome.runtime.onMessage.addListener((message: EventMessage<EventType>) => {
+    if (message.type == EventType.SYNC_I18N) {
+        modifyI18nContent();
+    }
+})
+
+modifyI18nContent();
