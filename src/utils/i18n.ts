@@ -12,7 +12,7 @@ const i18n = new I18n({
 i18n.onChange(async () => {
     chrome.runtime.sendMessage({ type: EventType.SYNC_I18N });
     const tabsOfInterest = await chrome.tabs.query({
-        url: "*://books.toraebook.com/toraebook/index.php"
+        url: "*://books.toraebook.com/toraebook/*"
         // url: "http://localhost:8080/*"
     });
     ( tabsOfInterest || [] ).forEach(tab => {

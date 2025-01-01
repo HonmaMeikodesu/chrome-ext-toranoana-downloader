@@ -52,7 +52,7 @@ const pack = async () => {
     }));
     
     await bz({
-        source: "./*",
+        source: "*",
         destination: artifactName,
         cwd: outputDirName
     });

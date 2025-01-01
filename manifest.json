@@ -19,8 +19,7 @@
   "content_scripts": [
     {
       "matches": [
-        "*://books.toraebook.com/toraebook/*",
-        "http://localhost:8080/*"
+        "*://books.toraebook.com/toraebook/*"
       ],
       "js": [
         "dist/content.js"
@@ -42,8 +41,7 @@
         "dist/popup.js"
       ],
       "matches": [
-        "*://*.toraebook.com/*",
-        "http://localhost:8080/*"
+        "*://*.toraebook.com/*"
       ]
     }
   ]
