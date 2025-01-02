@@ -74,4 +74,6 @@ h1, h2, h3, h4, h5, h6 {
 
 .popup-body {
   padding: 8px;
+  height: calc(100% - 32px - 13px);
+  overflow-y: auto;
 }
