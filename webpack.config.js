@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 /** @type {import("webpack").Configuration}  */
 const webConfig = {
@@ -17,21 +18,34 @@ const webConfig = {
         rules: [
             {
                 test: /\.tsx?$/,
-                use: 'ts-loader',
-                exclude: /node_modules/,
-            },
-            {
-                test: /\.jsx?$/,
-                exclude: /node_modules/,
-                use: {
-                    loader: "babel-loader",
-                    options: {
-                        presets: [
-                            "@babel/preset-env",
-                            "@babel/preset-react"
-                        ],
+                use: [
+                    {
+                        loader: "babel-loader",
+                        /** @type {import("@babel/core").TransformOptions} */
+                        options: {
+                            presets: [
+                                "@babel/preset-env",
+                                "@babel/preset-react"
+                            ],
+                            // TODO convert to ESM Module to enable static import analysis hence tree shaking
+                            plugins: [
+                                ["import", { libraryName: "antd", style: true, libraryDirectory: "lib" }],
+                                ["import", { libraryName: "lodash", camel2DashComponentName: false }, "import-lodash"]
+                            ]
+
+                        }
+                    },
+                    {
+                        loader: "ts-loader",
+                        /** @type {import("ts-loader").Options} */
+                        options: {
+                            logInfoToStdOut: true,
+                            logLevel: "INFO",
+                        }
+
                     }
-                },
+                ],
+                exclude: /node_modules/,
             },
             {
                 test: /\.css$/i,
@@ -54,9 +68,12 @@ const webConfig = {
         ],
     },
     devtool: false,
-    plugins: [new HtmlWebpackPlugin({
-        excludeChunks: ["content"]
-    })],
+    plugins: [
+        new HtmlWebpackPlugin({
+            excludeChunks: ["content"]
+        }),
+        process.env.NODE_ENV === "production" ? new BundleAnalyzerPlugin({ analyzerPort: 9000}) : undefined
+    ].filter(Boolean),
 };
 
 /** @type {import("webpack").Configuration}  */
@@ -78,24 +95,26 @@ const serviceWorkerConfig = {
         rules: [
             {
                 test: /\.ts?$/,
-                use: 'ts-loader',
-                exclude: /node_modules/,
-            },
-            {
-                test: /\.js?$/,
-                exclude: /node_modules/,
-                use: {
-                    loader: "babel-loader",
-                    options: {
-                        presets: [
-                            "@babel/preset-env",
-                            "@babel/preset-react"
-                        ],
+                use: [
+                    {
+                        loader: "babel-loader",
+                        options: {
+                            presets: [
+                                "@babel/preset-env"
+                            ]
+                        }
+                    },
+                    {
+                        loader: "ts-loader"
                     }
-                },
+                ],
+                exclude: /node_modules/,
             }
         ],
     },
+    plugins: [
+        process.env.NODE_ENV === "production" ? new BundleAnalyzerPlugin({ analyzerPort: 9001}) : undefined
+    ].filter(Boolean),
     devtool: false,
 };
 
