@@ -1,11 +1,10 @@
 import { isEmpty } from "lodash";
-import { parseAndSave } from "../download";
-import { __urlInfo, HeaderInfo } from "./_internal";
+import { parseAndSave } from "../download.js";
+import { __urlInfo, HeaderInfo } from "./_internal.js";
 import moment from "moment";
-import { localEventBus, LocalEventMessage, LocalEventType } from "./localEventBus";
-// @ts-expect-error this module HAS commonJs entry
+import { localEventBus, LocalEventMessage, LocalEventType } from "./localEventBus.js";
 import { parseHTML } from "linkedom";
-import { getLocalStorageItem } from "./storageManage";
+import { getLocalStorageItem } from "./storageManage.js";
 
 const EXPIRE_MINS = 5;
 

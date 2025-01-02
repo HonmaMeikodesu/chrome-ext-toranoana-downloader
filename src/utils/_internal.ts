@@ -1,5 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
-import { ClassifedData } from "../types";
+import { ClassifedData } from "../types.js";
 
 export type BookInfo = {
 	contentType: string;

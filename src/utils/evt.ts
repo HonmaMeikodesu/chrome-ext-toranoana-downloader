@@ -1,4 +1,4 @@
-import { AppConfig, Task } from "../types";
+import { AppConfig, Task } from "../types.js";
 
 export const EventMessageTypeGuard = <T extends EventType>(message: EventMessage<T>, type: T): message is EventMessage<T> => {
     return message?.type == type;

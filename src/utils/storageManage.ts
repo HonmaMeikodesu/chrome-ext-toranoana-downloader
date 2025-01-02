@@ -1,6 +1,5 @@
 // don't know how to implement reader and writer locks here, so let's just ask IndexedDB to do this favor
 import { AppConfig, Task } from "../types.js";
-// @ts-expect-error ignore this ts error, this module INDEED has a CJS entry, checkout out its main field in package.json
 import { openDB, IDBPDatabase } from "idb";
 import { EventType } from "./evt.js";
 

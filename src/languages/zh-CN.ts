@@ -1,4 +1,4 @@
-import { I18nConfig } from "./types";
+import { I18nConfig } from "./types.js";
 
 const zh_CN: I18nConfig = {
   UI: {

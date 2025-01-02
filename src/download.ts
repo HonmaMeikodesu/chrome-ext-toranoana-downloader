@@ -1,5 +1,5 @@
-import { File } from "./types"
-import { convertBlobToBase64 } from "./utils/common";
+import { File } from "./types.js"
+import { convertBlobToBase64 } from "./utils/common.js";
 
 export async function parseAndSave(fileInfo: File) {
 

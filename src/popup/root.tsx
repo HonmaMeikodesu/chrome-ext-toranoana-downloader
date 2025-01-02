@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import TaskList from "./taskList";
-import { EventMessage, EventMessageResponse, EventMessageTypeGuard, EventType } from "../utils/evt";
-import { AppConfig, Task } from "../types";
-import "./root.css";
 import { Button, Divider } from "antd";
-import Config from "./config";
-import { useI18n } from "./hooks/useI18n";
+import TaskList from "./taskList/index.jsx";
+import { EventMessage, EventMessageResponse, EventMessageTypeGuard, EventType } from "../utils/evt.js";
+import { AppConfig, Task } from "../types.js";
+import Config from "./config/index.jsx";
+import { useI18n } from "./hooks/useI18n.js";
+
+import "./root.css";
 export default function Root() {
     const [ tasks, setTasks  ] = useState<Task[]>([]);
     const [appConfig, setAppConfig] = useState<AppConfig>({ multiThreadFetch: undefined });

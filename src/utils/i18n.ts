@@ -1,8 +1,8 @@
 import { I18n } from "i18n-js";
-import zh_CN from "../languages/zh-CN";
-import en from "../languages/en";
-import { getLocalStorageItem } from "./storageManage";
-import { EventType } from "./evt";
+import zh_CN from "../languages/zh-CN.js";
+import en from "../languages/en.js";
+import { getLocalStorageItem } from "./storageManage.js";
+import { EventType } from "./evt.js";
 
 const i18n = new I18n({
     "zh-CN": zh_CN,

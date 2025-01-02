@@ -14,7 +14,7 @@ export default [
       "node_modules",
       "dist",
       "scripts",
-      "webpack.config.js",
+      "webpack.config.cjs",
       "output",
       "server.js",
       "WEBPACK_FALLBACK"

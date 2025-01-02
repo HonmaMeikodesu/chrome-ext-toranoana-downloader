@@ -1,10 +1,10 @@
 import { Button, Form, InputNumber, Popover, Select } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
-import { AppConfig } from "../../types";
 import { useEffect, useState } from "react";
+import { useI18n } from "../hooks/useI18n.js";
+import { AppConfig } from "../../types.js";
 
 import "./index.scss";
-import { useI18n } from "../hooks/useI18n";
 
 type ComponentProps = {
     appConfig: AppConfig;

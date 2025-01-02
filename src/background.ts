@@ -1,10 +1,10 @@
-import { AppConfig } from "./types";
-import { getIdFromBookUrl } from "./utils/common";
-import { EventMessage, EventMessageTypeGuard, EventType } from "./utils/evt";
-import i18n from "./utils/i18n";
-import { localEventBus, LocalEventMessage, LocalEventType } from "./utils/localEventBus";
-import { processBook } from "./utils/process";
-import { getTaskList, setTaskList, insertToTaskList, removeFromTaskList, initTaskDB, getLocalStorageItem, setLocalStorageItem } from "./utils/storageManage";
+import { AppConfig } from "./types.js";
+import { getIdFromBookUrl } from "./utils/common.js";
+import { EventMessage, EventMessageTypeGuard, EventType } from "./utils/evt.js";
+import i18n from "./utils/i18n.js";
+import { localEventBus, LocalEventMessage, LocalEventType } from "./utils/localEventBus.js";
+import { processBook } from "./utils/process.js";
+import { getTaskList, setTaskList, insertToTaskList, removeFromTaskList, initTaskDB, getLocalStorageItem, setLocalStorageItem } from "./utils/storageManage.js";
 
 chrome.runtime.onInstalled.addListener(async () => {
     await initTaskDB();

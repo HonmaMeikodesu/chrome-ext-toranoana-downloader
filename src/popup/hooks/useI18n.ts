@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { EventMessage, EventMessageResponse, EventType } from "../../utils/evt";
+import { EventMessage, EventMessageResponse, EventType } from "../../utils/evt.js";
 
 export function useI18n(keys: string[]): string[] {
 

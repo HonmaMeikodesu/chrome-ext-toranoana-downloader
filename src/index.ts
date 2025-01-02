@@ -1,4 +1,4 @@
-import { EventMessage, EventMessageResponse, EventType } from "./utils/evt";
+import { EventMessage, EventMessageResponse, EventType } from "./utils/evt.js";
 
 const DOWNLOAD_BTN_CLS = "toranana-content-script-download-btn";
 

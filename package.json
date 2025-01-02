@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "downloader for toranoana online hondana",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "webpack --mode development && node scripts/manifest && node scripts/pack",
-    "build": "export NODE_ENV=production && webpack --mode production && node scripts/manifest && node scripts/pack"
+    "start": "webpack --mode development && node scripts/manifest.cjs && node scripts/pack.cjs",
+    "build": "export NODE_ENV=production && webpack --mode production && node scripts/manifest.cjs && node scripts/pack.cjs"
   },
   "repository": {
     "type": "git",

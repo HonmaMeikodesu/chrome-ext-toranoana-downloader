@@ -1,13 +1,13 @@
 import { useCallback } from "react";
-import { Task } from "../../types";
-import { ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined, BugOutlined, CloseOutlined } from "@ant-design/icons";
 import { Button, Collapse, CollapseProps } from "antd";
-import { EventMessage, EventType } from "../../utils/evt";
+import { cloneDeep } from "lodash";
 import cx from "classnames";
+import { Task } from "../../types.js";
+import { ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined, BugOutlined, CloseOutlined } from "@ant-design/icons";
+import { EventMessage, EventType } from "../../utils/evt.js";
+import { useI18n } from "../hooks/useI18n.js";
 
 import "./index.scss";
-import { cloneDeep } from "lodash";
-import { useI18n } from "../hooks/useI18n";
 
 type ComponentProps = {
     tasks: Task[];

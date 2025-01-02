@@ -12,7 +12,11 @@ const webConfig = {
     output: { path: path.resolve(__dirname, "dist") },
     resolve: {
         extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
-        fallback: { stream: require.resolve("stream-browserify") }
+        fallback: { stream: require.resolve("stream-browserify") },
+        extensionAlias: {
+            '.js': ['.ts', '.js'],
+            '.jsx': ['.tsx', '.jsx']
+        },
     },
     module: {
         rules: [
@@ -27,10 +31,9 @@ const webConfig = {
                                 "@babel/preset-env",
                                 "@babel/preset-react"
                             ],
-                            // TODO convert to ESM Module to enable static import analysis hence tree shaking
                             plugins: [
                                 ["import", { libraryName: "antd", style: true, libraryDirectory: "lib" }],
-                                ["import", { libraryName: "lodash", camel2DashComponentName: false }, "import-lodash"]
+                                ["import", { libraryName: "lodash", camel2DashComponentName: false, libraryDirectory: "" }, "import-lodash"]
                             ]
 
                         }
@@ -89,7 +92,10 @@ const serviceWorkerConfig = {
             stream: require.resolve("stream-browserify"),
             "perf_hooks": require.resolve("./WEBPACK_FALLBACK/perf_hooks.cjs"),
             "canvas": require.resolve("./WEBPACK_FALLBACK/canvas-shim.cjs")
-        }
+        },
+        extensionAlias: {
+            '.js': ['.ts', '.js']
+        },
     },
     module: {
         rules: [
@@ -101,6 +107,9 @@ const serviceWorkerConfig = {
                         options: {
                             presets: [
                                 "@babel/preset-env"
+                            ],
+                            plugins: [
+                                ["import", { libraryName: "lodash", camel2DashComponentName: false, libraryDirectory: "" }, "import-lodash"]
                             ]
                         }
                     },
