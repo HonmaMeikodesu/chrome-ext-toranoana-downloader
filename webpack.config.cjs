@@ -75,7 +75,7 @@ const webConfig = {
         new HtmlWebpackPlugin({
             excludeChunks: ["content"]
         }),
-        process.env.NODE_ENV === "production" ? new BundleAnalyzerPlugin({ analyzerPort: 9000}) : undefined
+        process.env.ANALYZE_FLAG ? new BundleAnalyzerPlugin({ analyzerPort: 9000}) : undefined
     ].filter(Boolean),
 };
 
@@ -122,7 +122,7 @@ const serviceWorkerConfig = {
         ],
     },
     plugins: [
-        process.env.NODE_ENV === "production" ? new BundleAnalyzerPlugin({ analyzerPort: 9001}) : undefined
+        process.env.ANALYZE_FLAG ? new BundleAnalyzerPlugin({ analyzerPort: 9001}) : undefined
     ].filter(Boolean),
     devtool: false,
 };

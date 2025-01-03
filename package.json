@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "webpack --mode development && node scripts/manifest.cjs && node scripts/pack.cjs",
-    "build": "export NODE_ENV=production && webpack --mode production && node scripts/manifest.cjs && node scripts/pack.cjs"
+    "analyze": "cross-env ANALYZE_FLAG=1 webpack --mode production",
+    "build": "cross-env NODE_ENV=production webpack --mode production && node scripts/manifest.cjs && node scripts/pack.cjs"
   },
   "repository": {
     "type": "git",
@@ -37,6 +38,7 @@
     "babel-loader": "^9.2.1",
     "babel-plugin-import": "^1.13.8",
     "bestzip": "^2.2.1",
+    "cross-env": "^7.0.3",
     "css-loader": "^7.1.2",
     "eslint": "^9.14.0",
     "eslint-plugin-react": "^7.37.2",
