@@ -3,7 +3,7 @@
 The GitHub Actions workflow in `.github/workflows/chrome-web-store.yml` builds every push and pull request targeting `main`. It uploads and submits a package to the Chrome Web Store only when:
 
 - a tag such as `v1.0.1` is pushed; or
-- the workflow is started manually with a valid Chrome extension version.
+- the workflow is started manually with a valid Chrome extension version and the publish option enabled.
 
 The version from the tag or manual input is injected into `manifest.json` during the build. It must contain one to four dot-separated integers and must be greater than zero.
 
@@ -30,6 +30,8 @@ Create a GitHub environment named `chrome-web-store`. Add these environment vari
 | `CHROME_WEB_STORE_EXTENSION_ID` | ID of the existing store item |
 
 An optional required-reviewer rule can be added to the environment if publishing should require a final human approval.
+
+To verify Workload Identity Federation without uploading anything, run the workflow manually and leave the publish option disabled. The workflow will authenticate and call the read-only `fetchStatus` endpoint.
 
 ## Release
 

@@ -15,6 +15,11 @@ on:
         description: "Chrome extension version, for example 1.0.1"
         required: true
         type: string
+      publish:
+        description: "Upload and submit this version to the Chrome Web Store"
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   build:
@@ -102,7 +107,27 @@ jobs:
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
           access_token_scopes: https://www.googleapis.com/auth/chromewebstore
 
+      - name: Verify Chrome Web Store access
+        shell: bash
+        env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          PUBLISHER_ID: ${{ vars.CHROME_WEB_STORE_PUBLISHER_ID }}
+          EXTENSION_ID: ${{ vars.CHROME_WEB_STORE_EXTENSION_ID }}
+        run: |
+          for variable_name in ACCESS_TOKEN PUBLISHER_ID EXTENSION_ID; do
+            if [[ -z "${!variable_name}" ]]; then
+              echo "Missing required value: ${variable_name}" >&2
+              exit 1
+            fi
+          done
+
+          item_name="publishers/${PUBLISHER_ID}/items/${EXTENSION_ID}"
+          curl --fail-with-body --silent --show-error \
+            --header "Authorization: Bearer ${ACCESS_TOKEN}" \
+            "https://chromewebstore.googleapis.com/v2/${item_name}:fetchStatus" | jq .
+
       - name: Upload and submit to Chrome Web Store
+        if: github.event_name != 'workflow_dispatch' || inputs.publish
         shell: bash
         env:
           ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
