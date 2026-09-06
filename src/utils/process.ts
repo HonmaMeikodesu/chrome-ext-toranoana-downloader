@@ -1,10 +1,9 @@
-import { isEmpty } from "lodash";
 import { parseAndSave } from "../download.js";
 import { __urlInfo, HeaderInfo } from "./_internal.js";
 import moment from "moment";
-import { localEventBus, LocalEventMessage, LocalEventType } from "./localEventBus.js";
 import { parseHTML } from "linkedom";
 import { getLocalStorageItem } from "./storageManage.js";
+import { readJavaScriptStringConstant, sanitizeDownloadPathSegment } from "./text.js";
 
 const EXPIRE_MINS = 5;
 
@@ -14,36 +13,21 @@ function parseBookMeta(viewerHtml: string) {
 
     const viewerHtmlDom = fakeWin.document;
 
-    const inlineScripts = viewerHtmlDom.querySelectorAll("script[type='text/javascript']");
+    const scriptSource = [...viewerHtmlDom.querySelectorAll("script[type='text/javascript']")]
+        .map(script => script.textContent ?? "")
+        .join("\n");
 
-    const regex = {
-        p1: /const\s+p1\s*=\s*"([^"]+)";/,
-        p2: /const\s+p2\s*=\s*"([^"]+)";/,
-        p5: /const\s+p5\s*=\s*"([^"]+)";/,
-        p7: /const\s+p7\s*=\s*"([^"]+)";/,
-        p8: /const\s+p8\s*=\s*"([^"]+)";/
-    };
-
-    let p1: string = "";
-    let p2: string = "";
-    let p5: string = "";
-    let title: string = "";
-    let author: string = "";
-
-    [...inlineScripts].forEach(script => {
-        if (p1 || p2 || p5) return;
-        p1 = script.textContent?.match(regex.p1)?.[1] ?? "";
-        p2 = script.textContent?.match(regex.p2)?.[1] ?? "";
-        p5 = script.textContent?.match(regex.p5)?.[1] ?? "";
-        title = script.textContent?.match(regex.p7)?.[1] ?? "";
-        author = script.textContent?.match(regex.p8)?.[1] ?? "";
-    });
+    const p1 = readJavaScriptStringConstant(scriptSource, "p1");
+    const p2 = readJavaScriptStringConstant(scriptSource, "p2");
+    const p5 = readJavaScriptStringConstant(scriptSource, "p5");
+    const title = readJavaScriptStringConstant(scriptSource, "p7") || viewerHtmlDom?.title || "";
+    const author = readJavaScriptStringConstant(scriptSource, "p8");
 
     return {
         p1,
         p2,
         p5,
-        title: title ?? viewerHtmlDom?.title,
+        title,
         author
     }
 }
@@ -67,20 +51,38 @@ export async function requestBookAccess(bookUrl: string) {
     }
 }
 
-export async function processBook(bookUrl: string, options?: { pageNums?: number[] }) {
+type ProcessBookOptions = {
+    pageNums?: number[];
+    onStart?: (details: { bookTitle: string; pageList: number[] }) => void | Promise<void>;
+    onPageComplete?: (pageNum: number) => void | Promise<void>;
+};
+
+export type ProcessBookResult = {
+    bookTitle: string;
+    pageList: number[];
+    errorPageList: number[];
+};
+
+export async function processBook(bookUrl: string, options?: ProcessBookOptions): Promise<ProcessBookResult> {
 
     let { multiThreadFetch } = await getLocalStorageItem("appConfig");
 
-    multiThreadFetch = multiThreadFetch ?? 1;
+    const configuredThreadCount = Number(multiThreadFetch ?? 1);
+    const threadCount = Number.isFinite(configuredThreadCount) && configuredThreadCount > 0
+        ? Math.floor(configuredThreadCount)
+        : 1;
 
-    const { imageUrl, headerInfo, title, author } = await requestBookAccess(bookUrl);
+    const access = await requestBookAccess(bookUrl);
+    let { imageUrl, headerInfo } = access;
+    const { title, author } = access;
 
-    const parentDirectory = `${title}${author ? `(${author})` : ""}`;
+    const parentDirectory = sanitizeDownloadPathSegment(`${title}${author ? `(${author})` : ""}`);
 
     const errorPageList: number[] = [];
 
     const worker = async (params: HeaderInfo["pgs"]["pg"][number]) => {
         const { img, x, id, n } = params;
+        let stage = "requesting the page access directive";
         try {
             const idUrl = imageUrl(img, x);
             const res = await fetch(idUrl);
@@ -95,16 +97,20 @@ export async function processBook(bookUrl: string, options?: { pageNums?: number
 
             const rjsonx = resJson["x"];
 
+            stage = "decoding and saving the page";
             await parseAndSave({
                 fileName: `${parentDirectory}/${id}.jpg`,
                 accessDirective: {
                     image: rimgsrc,
                     x: rjsonx
                 }
-            })
+            });
+
+            stage = "recording the completed page";
+            await options?.onPageComplete?.(n);
 
         } catch (e) {
-            console.error(e);
+            console.error(`[Toranoana Downloader] Page ${n} failed while ${stage}.`, e);
             errorPageList.push(n) 
         }
     };
@@ -113,49 +119,26 @@ export async function processBook(bookUrl: string, options?: { pageNums?: number
 
     const targetPages = options?.pageNums ? options.pageNums.filter(pageNum => pageNumList.includes(pageNum)) : pageNumList;
 
-    const startDownloadMsg: LocalEventMessage<LocalEventType.START_DOWNLOAD> = {
-        payload: {
-            bookUrl,
-            bookTitle: title,
-            pageList: targetPages 
-        }
-    };
-    localEventBus.emit(LocalEventType.START_DOWNLOAD, startDownloadMsg);
+    await options?.onStart?.({ bookTitle: title, pageList: targetPages });
 
     let now = moment();
-    for(let i = 0; i < targetPages.length; i+=multiThreadFetch) {
-        const targetBatch = targetPages.slice(i, i + multiThreadFetch);
+    for(let i = 0; i < targetPages.length; i += threadCount) {
+        const targetBatch = targetPages.slice(i, i + threadCount);
         await Promise.all(targetBatch.map((pageNum) => worker(headerInfo.pgs.pg.find(item => item.n === pageNum)!)));
         const elapsed = moment().diff(now, "minutes");
-        if (elapsed > EXPIRE_MINS) {
-            const { headerInfo: nextHeaderInfo } = await requestBookAccess(bookUrl);
-            headerInfo.pgs = nextHeaderInfo.pgs;
+        if (elapsed >= EXPIRE_MINS && i + threadCount < targetPages.length) {
+            const nextAccess = await requestBookAccess(bookUrl);
+            imageUrl = nextAccess.imageUrl;
+            headerInfo = nextAccess.headerInfo;
             now = moment();
         }
     }
 
-    if (!isEmpty(errorPageList)) {
-        const downloadFailMsg: LocalEventMessage<LocalEventType.DOWNLOAD_ERROR> = {
-            payload: {
-                bookUrl,
-                bookTitle: title,
-                errorPageList
-            }
-        };
-
-        localEventBus.emit(LocalEventType.DOWNLOAD_ERROR, downloadFailMsg);
-        return;
-    }
-    
-    const downloadCompleteMsg: LocalEventMessage<LocalEventType.DOWNLOAD_COMPLETE> = {
-        payload: {
-            bookUrl,
-            bookTitle: title,
-            pageList: targetPages
-        }
+    return {
+        bookTitle: title,
+        pageList: targetPages,
+        errorPageList: errorPageList.sort((a, b) => a - b)
     };
-
-    localEventBus.emit(LocalEventType.DOWNLOAD_COMPLETE, downloadCompleteMsg);
 }
 
 

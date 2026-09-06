@@ -14,7 +14,15 @@ export type ClassifedData = {
     p5: string
 }
 
-export type Task = { id: string; bookUrl: string; bookTitle: string; errorPageList?: number[], status: "pending" | "downloading" | "done" | "error" | "fatal" };
+export type Task = {
+    id: string;
+    bookUrl: string;
+    bookTitle: string;
+    errorPageList?: number[];
+    pageList?: number[];
+    completedPageList?: number[];
+    status: "pending" | "downloading" | "done" | "error" | "fatal";
+};
 
 export type AppConfig = {
     multiThreadFetch?: number;

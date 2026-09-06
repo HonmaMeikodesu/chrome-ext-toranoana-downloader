@@ -21,6 +21,9 @@ const zh_CN: I18nConfig = {
     },
     content: {
       download: "下载",
+      downloadSettingsPrompt: `下载前，请确认 Chrome 的“下载前询问每个文件的保存位置”已关闭，否则每一页都会弹出保存窗口。
+
+设置位置：chrome://settings/downloads`,
       disclaimer: `在使用该功能之前，您是否同意以下免责声明？
 
 Toranoana Downloader（以下简称“本软件”）由本人（以下简称“作者”）开发，本软件基于 MIT 协议开源，您可以在 Github 上获取源代码。本软件仅供学习交流使用，不得用于任何个人或企业的商业用途。

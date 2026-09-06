@@ -21,6 +21,9 @@ const en: I18nConfig = {
         },
         content: {
             download: "Download",
+            downloadSettingsPrompt: `Before downloading, make sure "Ask where to save each file before downloading" is turned off in Chrome. Otherwise, a save window will appear for every page.
+
+Settings: chrome://settings/downloads`,
             disclaimer: `Before using this function, do you agree to the following disclaimer?
 
 Toranoana Downloader (hereinafter referred to as "this software") is released under the MIT license.

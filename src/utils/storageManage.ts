@@ -5,24 +5,29 @@ import { EventType } from "./evt.js";
 
 const DB_NAME = "toranoana-db";
 const TASK_STORE_NAME = "taskStore";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export async function initTaskDB() {
-    const exports = await import("idb");
-    await exports.openDB(DB_NAME, DB_VERSION, {
-        upgrade(db) {
-            db.createObjectStore(TASK_STORE_NAME, { keyPath: "id" });
-        }
-    });
+    await getDbHandle();
 }
 
-let dbHandle: IDBPDatabase<any>;
+let dbHandlePromise: Promise<IDBPDatabase<any>> | undefined;
 
 const getDbHandle = async () => {
-    if (!dbHandle) {
-        dbHandle = await openDB(DB_NAME);
+    if (!dbHandlePromise) {
+        dbHandlePromise = openDB(DB_NAME, DB_VERSION, {
+            upgrade(db) {
+                if (!db.objectStoreNames.contains(TASK_STORE_NAME)) {
+                    db.createObjectStore(TASK_STORE_NAME, { keyPath: "id" });
+                }
+            }
+        });
     }
-    return dbHandle
+    return dbHandlePromise;
+}
+
+function notifyTaskListChanged() {
+    void chrome.runtime.sendMessage({ type: EventType.SYNC_TASK_LIST }).catch(() => undefined);
 }
 
 export async function getTaskList(): Promise<Task[]> {
@@ -33,31 +38,50 @@ export async function getTaskList(): Promise<Task[]> {
 
 export async function setTaskList(taskList: Task[]) {
     const db = await getDbHandle();
-    const store = db.transaction(TASK_STORE_NAME, "readwrite").store;
-    await store.clear();
+    const transaction = db.transaction(TASK_STORE_NAME, "readwrite");
+    await transaction.store.clear();
     for (const task of taskList) {
-        await store.add(task);
+        await transaction.store.put(task);
     }
-    chrome.runtime.sendMessage({ type: EventType.SYNC_TASK_LIST });
+    await transaction.done;
+    notifyTaskListChanged();
 }
 
 export async function insertToTaskList(tasks: Task[]) {
     const db = await getDbHandle();
-    const store = db.transaction(TASK_STORE_NAME, "readwrite").store;
+    const transaction = db.transaction(TASK_STORE_NAME, "readwrite");
     for (const task of tasks) {
-        await store.put(task);
+        await transaction.store.put(task);
     }
-
-    chrome.runtime.sendMessage({ type: EventType.SYNC_TASK_LIST });
+    await transaction.done;
+    notifyTaskListChanged();
 }
 
 export async function removeFromTaskList(tasks: Task[]) {
     const db = await getDbHandle();
-    const store = db.transaction(TASK_STORE_NAME, "readwrite").store;
+    const transaction = db.transaction(TASK_STORE_NAME, "readwrite");
     for (const task of tasks) {
-        await store.delete(task.id);
+        await transaction.store.delete(task.id);
     }
-    chrome.runtime.sendMessage({ type: EventType.SYNC_TASK_LIST });
+    await transaction.done;
+    notifyTaskListChanged();
+}
+
+export async function updateTask(id: string, updater: (currentTask: Task | undefined) => Task | undefined) {
+    const db = await getDbHandle();
+    const transaction = db.transaction(TASK_STORE_NAME, "readwrite");
+    const currentTask: Task | undefined = await transaction.store.get(id);
+    const nextTask = updater(currentTask);
+
+    if (nextTask) {
+        await transaction.store.put(nextTask);
+    } else {
+        await transaction.store.delete(id);
+    }
+
+    await transaction.done;
+    notifyTaskListChanged();
+    return nextTask;
 }
 
 

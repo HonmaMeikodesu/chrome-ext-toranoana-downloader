@@ -1,11 +1,16 @@
 export async function convertBlobToBase64(blob: Blob): Promise<string> {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onloadend = () => {
-            const base64data = reader.result;
-            resolve(base64data as string);
+        reader.onload = () => {
+            if (typeof reader.result !== "string") {
+                reject(new Error("Could not convert the page image to a data URL."));
+                return;
+            }
+            resolve(reader.result);
         };
+        reader.onerror = () => reject(reader.error ?? new Error("Could not read the page image blob."));
+        reader.onabort = () => reject(new Error("Reading the page image blob was aborted."));
+        reader.readAsDataURL(blob);
     })
 }
  

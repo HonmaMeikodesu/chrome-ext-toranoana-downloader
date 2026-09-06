@@ -2,6 +2,8 @@ import { EventMessage, EventMessageResponse, EventType } from "./utils/evt.js";
 
 const DOWNLOAD_BTN_CLS = "toranana-content-script-download-btn";
 
+let isDownloadSettingConfirmed = false;
+
 const bookList =  document.querySelectorAll<HTMLAnchorElement>("#book_container .link-list > li > a");
 
 [...bookList].forEach((ele) => {
@@ -17,7 +19,15 @@ const bookList =  document.querySelectorAll<HTMLAnchorElement>("#book_container 
 
     const bookTitle = ele.querySelector("em")?.textContent?.trim()?.replace(/\n\s*/g, "");
 
-    download.onclick = () => disclaimerGuard().then(() => requestParseBook(bookUrl, bookTitle ?? ""));
+    download.onclick = async () => {
+        try {
+            await disclaimerGuard();
+            await downloadSettingsGuard();
+            requestParseBook(bookUrl, bookTitle ?? "");
+        } catch {
+            // The user cancelled one of the pre-download confirmations.
+        }
+    };
 
     return () => download.remove();
 })
@@ -44,6 +54,20 @@ async function disclaimerGuard() {
         }
         throw new Error();
     }
+}
+
+async function downloadSettingsGuard() {
+    if (isDownloadSettingConfirmed) {
+        return;
+    }
+
+    const prompt = await getI18nText("UI.content.downloadSettingsPrompt");
+
+    if (!confirm(prompt)) {
+        throw new Error("Download cancelled by user");
+    }
+
+    isDownloadSettingConfirmed = true;
 }
 
 function requestParseBook(bookUrl: string, initBookTitle: string) {

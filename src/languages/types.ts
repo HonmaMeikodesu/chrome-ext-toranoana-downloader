@@ -20,7 +20,8 @@ export type I18nConfig = {
         },
         content: {
             download: string,
-            disclaimer: string
+            disclaimer: string,
+            downloadSettingsPrompt: string
         }
     },
 }

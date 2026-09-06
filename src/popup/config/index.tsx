@@ -32,7 +32,7 @@ export default function Config(props: ComponentProps) {
     const [title, save, multiThreadFetchLabel, multiThreadFetchTooltip, localeLabel] = useI18n(["UI.popup.configForm.title", "UI.popup.configForm.saveAndApply", "UI.popup.configForm.multiThreadFetchLabel", "UI.popup.configForm.multiThreadFetchTooltip", "UI.popup.configForm.localeLabel"])
 
     const localeOptions: Array<{ label: string, value: AppConfig["locale"] }> = [
-        // { label: "简体中文", value: "zh-CN" }, 
+        { label: "简体中文", value: "zh-CN" },
         { label: "English", value: "en" }
     ];
 
