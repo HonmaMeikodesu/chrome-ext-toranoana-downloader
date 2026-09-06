@@ -2,13 +2,25 @@
 
 const { writeFileSync } = require("fs");
 const { resolve } = require("path");
+const { version: packageVersion } = require("../package.json");
+
+const extensionVersion = process.env.EXTENSION_VERSION || packageVersion;
+const versionParts = extensionVersion.split(".");
+const isValidVersion = versionParts.length >= 1
+    && versionParts.length <= 4
+    && versionParts.some(part => Number(part) > 0)
+    && versionParts.every(part => /^(0|[1-9]\d*)$/.test(part) && Number(part) <= 65535);
+
+if (!isValidVersion) {
+    throw new Error(`Invalid Chrome extension version: ${extensionVersion}`);
+}
 
 /** @type {chrome.runtime.ManifestV3} */
 const mainfestJson = {
     manifest_version: 3,
     name: "Toranoana Downloader",
     description: "downloader for toranoana online hondana",
-    version: "1.0",
+    version: extensionVersion,
     action: {
         default_icon: "icons/icon128.png",
         default_popup: "dist/index.html"

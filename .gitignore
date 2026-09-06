@@ -2,3 +2,5 @@ node_modules
 dist
 output
 artifact.zip
+.playwright-mcp/
+gha-creds-*.json

@@ -1,0 +1,157 @@
+name: Build and publish Chrome extension
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v[0-9]*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Chrome extension version, for example 1.0.1"
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      artifact_name: ${{ steps.version.outputs.artifact_name }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Resolve extension version
+        id: version
+        shell: bash
+        run: |
+          release_version=""
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            release_version="${{ inputs.version }}"
+          elif [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            release_version="${GITHUB_REF_NAME#v}"
+          fi
+
+          release_version="${release_version#v}"
+          if [[ -n "${release_version}" ]]; then
+            if [[ ! "${release_version}" =~ ^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*)){0,3}$ ]] || [[ "${release_version}" == "0" ]]; then
+              echo "Invalid Chrome extension version: ${release_version}" >&2
+              exit 1
+            fi
+            echo "EXTENSION_VERSION=${release_version}" >> "${GITHUB_ENV}"
+            echo "artifact_name=chrome-extension-${release_version}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "artifact_name=chrome-extension-${GITHUB_SHA}" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build extension package
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.version.outputs.artifact_name }}
+          path: artifact.zip
+          if-no-files-found: error
+
+  publish:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    environment: chrome-web-store
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.artifact_name }}
+          path: release
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          token_format: access_token
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+
+      - name: Upload and submit to Chrome Web Store
+        shell: bash
+        env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          PUBLISHER_ID: ${{ vars.CHROME_WEB_STORE_PUBLISHER_ID }}
+          EXTENSION_ID: ${{ vars.CHROME_WEB_STORE_EXTENSION_ID }}
+        run: |
+          for variable_name in ACCESS_TOKEN PUBLISHER_ID EXTENSION_ID; do
+            if [[ -z "${!variable_name}" ]]; then
+              echo "Missing required value: ${variable_name}" >&2
+              exit 1
+            fi
+          done
+
+          item_name="publishers/${PUBLISHER_ID}/items/${EXTENSION_ID}"
+          upload_url="https://chromewebstore.googleapis.com/upload/v2/${item_name}:upload"
+          status_url="https://chromewebstore.googleapis.com/v2/${item_name}:fetchStatus"
+          publish_url="https://chromewebstore.googleapis.com/v2/${item_name}:publish"
+
+          upload_response="$(curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer ${ACCESS_TOKEN}" \
+            --header "Content-Type: application/zip" \
+            --upload-file release/artifact.zip \
+            "${upload_url}")"
+
+          upload_state="$(jq -r '.uploadState // empty' <<< "${upload_response}")"
+          for attempt in {1..30}; do
+            if [[ "${upload_state}" != "IN_PROGRESS" ]]; then
+              break
+            fi
+            sleep 10
+            status_response="$(curl --fail-with-body --silent --show-error \
+              --header "Authorization: Bearer ${ACCESS_TOKEN}" \
+              "${status_url}")"
+            upload_state="$(jq -r '.lastAsyncUploadState // empty' <<< "${status_response}")"
+          done
+
+          if [[ "${upload_state}" != "SUCCEEDED" ]]; then
+            echo "Chrome Web Store upload did not succeed: ${upload_state:-unknown}" >&2
+            echo "${upload_response}" | jq .
+            exit 1
+          fi
+
+          publish_response="$(curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer ${ACCESS_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --data '{"publishType":"DEFAULT_PUBLISH","blockOnWarnings":true}' \
+            "${publish_url}")"
+
+          echo "Chrome Web Store submission created:"
+          echo "${publish_response}" | jq .

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Toranoana Downloader",
   "description": "downloader for toranoana online hondana",
-  "version": "1.0",
+  "version": "1.0.0",
   "action": {
     "default_icon": "icons/icon128.png",
     "default_popup": "dist/index.html"

@@ -7,7 +7,9 @@
   "scripts": {
     "start": "webpack --mode development && node scripts/manifest.cjs && node scripts/pack.cjs",
     "analyze": "cross-env ANALYZE_FLAG=1 webpack --mode production",
-    "build": "cross-env NODE_ENV=production webpack --mode production && node scripts/manifest.cjs && node scripts/pack.cjs"
+    "build": "cross-env NODE_ENV=production webpack --mode production && node scripts/manifest.cjs && node scripts/pack.cjs",
+    "typecheck": "tsc --noEmit --skipLibCheck",
+    "test": "node --test tests/*.test.mjs"
   },
   "repository": {
     "type": "git",
